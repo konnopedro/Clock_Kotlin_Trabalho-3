@@ -1,0 +1,304 @@
+package com.example.tungclock
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import kotlinx.coroutines.delay
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
+
+
+private val Fundo = Color(0xFF0B0E17)
+private val CardFundo = Color(0xFF171D2B)
+private val Roxo = Color(0xFF9B7CFF)
+private val Azul = Color(0xFF42B9F2)
+private val Texto = Color.White
+private val TextoSecundario = Color(0xFF9CA3B5)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun DetalheFusoScreen(
+    id: Int,
+    fusos: SnapshotStateList<FusoHorario>,
+    onVoltar: () -> Unit
+) {
+
+    val fuso = fusos.find {
+        it.id == id
+    }
+
+    if (fuso == null) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .fillMaxHeight()
+                .background(Fundo)
+                .padding(20.dp)
+        ) {
+
+            Text(
+                text = "Fuso não encontrado",
+                color = Texto
+            )
+
+            Button(
+                onClick = onVoltar
+            ) {
+                Text("Voltar")
+            }
+        }
+
+        return
+    }
+
+    var agora by remember {
+        mutableStateOf(
+            ZonedDateTime.now(
+                ZoneId.of(fuso.zona)
+            )
+        )
+    }
+
+    LaunchedEffect(fuso.zona) {
+
+        while (true) {
+
+            agora = ZonedDateTime.now(
+                ZoneId.of(fuso.zona)
+            )
+
+            delay(1000)
+        }
+    }
+
+    val horaFormatada = agora.format(
+        DateTimeFormatter.ofPattern("HH:mm:ss")
+    )
+
+    val agoraSaoPaulo = ZonedDateTime.now(
+        ZoneId.of("America/Sao_Paulo")
+    )
+
+    val diferenca =
+        fuso.offset - (-3)
+
+    val textoDiferenca = when {
+
+        diferenca == 0 ->
+            "Mesmo horário de São Paulo"
+
+        diferenca > 0 ->
+            "${diferenca} hora(s) à frente de São Paulo"
+
+        else ->
+            "${-diferenca} hora(s) atrás de São Paulo"
+    }
+
+    Scaffold(
+        containerColor = Fundo,
+        topBar = {
+
+            TopAppBar(
+                title = {
+                    Text("Detalhes do Fuso")
+                },
+                navigationIcon = {
+
+                    IconButton(
+                        onClick = onVoltar
+                    ) {
+
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Voltar"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Fundo,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
+            )
+        }
+    ) { innerPadding ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Fundo)
+                .padding(innerPadding)
+                .padding(20.dp)
+        ) {
+
+            Text(
+                text = fuso.cidade.uppercase(),
+                color = Roxo,
+                fontSize = 14.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            Text(
+                text = fuso.pais,
+                color = TextoSecundario,
+                fontSize = 13.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(35.dp)
+            )
+
+            Text(
+                text = "HORÁRIO ATUAL",
+                color = TextoSecundario,
+                fontSize = 12.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            Text(
+                text = horaFormatada,
+                color = Texto,
+                fontSize = 38.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(6.dp)
+            )
+
+            Text(
+                text = "UTC ${
+                    if (fuso.offset >= 0) "+"
+                    else ""
+                }${fuso.offset}",
+                color = Azul,
+                fontSize = 13.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(25.dp)
+            )
+
+            androidx.compose.material3.Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Column(
+                    modifier = Modifier
+                        .background(CardFundo)
+                        .padding(18.dp)
+                ) {
+
+                    Text(
+                        text = "COMPARAÇÃO",
+                        color = Roxo,
+                        fontSize = 12.sp
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Column {
+
+                            Text(
+                                text = "São Paulo",
+                                color = Texto,
+                                fontSize = 13.sp
+                            )
+
+                            Text(
+                                text = agoraSaoPaulo.format(
+                                    DateTimeFormatter.ofPattern("HH:mm")
+                                ),
+                                color = TextoSecundario,
+                                fontSize = 20.sp
+                            )
+                        }
+
+                        Column {
+
+                            Text(
+                                text = fuso.cidade,
+                                color = Texto,
+                                fontSize = 13.sp
+                            )
+
+                            Text(
+                                text = agora.format(
+                                    DateTimeFormatter.ofPattern("HH:mm")
+                                ),
+                                color = TextoSecundario,
+                                fontSize = 20.sp
+                            )
+                        }
+                    }
+
+                    Spacer(
+                        modifier = Modifier.height(15.dp)
+                    )
+
+                    Text(
+                        text = textoDiferenca,
+                        color = Azul,
+                        fontSize = 13.sp
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.height(25.dp)
+            )
+
+            Text(
+                text = "A diferença acima é calculada a partir do UTC do fuso selecionado e do UTC−3 de São Paulo.",
+                color = TextoSecundario,
+                fontSize = 11.sp
+            )
+        }
+    }
+}
