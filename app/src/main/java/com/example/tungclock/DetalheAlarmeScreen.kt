@@ -38,6 +38,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +56,16 @@ private val CardDetalheAlarme = Color(0xFF261D17)
 private val BordaDetalheAlarme = Color(0xFF493427)
 
 private val diasDaSemana = listOf("Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo")
+
+
+private fun formatarEntradaHorario(entrada: TextFieldValue): TextFieldValue {
+    val cursorOriginal = entrada.selection.start.coerceIn(0, entrada.text.length)
+    val digitosAntesDoCursor = entrada.text.take(cursorOriginal).count { it.isDigit() }
+    val digitos = entrada.text.filter { it.isDigit() }.take(4)
+    val formatado = if (digitos.length <= 2) digitos else digitos.take(2) + ":" + digitos.drop(2)
+    val cursorFormatado = if (digitosAntesDoCursor <= 2) digitosAntesDoCursor else digitosAntesDoCursor + 1
+    return TextFieldValue(formatado, selection = TextRange(cursorFormatado.coerceIn(0, formatado.length)))
+}
 
 private fun diasSelecionadosDoTexto(texto: String): Set<String> {
     val valor = texto.lowercase()
@@ -130,7 +142,7 @@ fun DetalheAlarmeScreen(
     }
 
     val alarmeAtual = alarme!!
-    var horario by remember(id) { mutableStateOf(alarmeAtual.horario) }
+    var horario by remember(id) { mutableStateOf(TextFieldValue(alarmeAtual.horario)) }
     var nome by remember(id) { mutableStateOf(alarmeAtual.nome) }
     var diasSelecionados by remember(id) { mutableStateOf(diasSelecionadosDoTexto(alarmeAtual.dias)) }
     var ativo by remember(id) { mutableStateOf(alarmeAtual.ativo) }
@@ -165,8 +177,7 @@ fun DetalheAlarmeScreen(
             OutlinedTextField(
                 value = horario,
                 onValueChange = { entrada ->
-                    val digitos = entrada.filter { it.isDigit() }.take(4)
-                    horario = if (digitos.length <= 2) digitos else digitos.substring(0, 2) + ":" + digitos.substring(2)
+                    horario = formatarEntradaHorario(entrada)
                     erro = ""
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -268,14 +279,14 @@ fun DetalheAlarmeScreen(
             Spacer(Modifier.height(22.dp))
             Button(
                 onClick = {
-                    val horarioValido = horario.matches(Regex("^([01][0-9]|2[0-3]):[0-5][0-9]$"))
+                    val horarioValido = horario.text.matches(Regex("^([01][0-9]|2[0-3]):[0-5][0-9]$"))
                     if (!horarioValido) {
                         erro = "Digite um horário válido entre 00:00 e 23:59."
                     } else if (nome.isBlank()) {
                         erro = "Digite um nome para o alarme."
                     } else {
                         val atualizado = alarmeAtual.copy(
-                            horario = horario,
+                            horario = horario.text,
                             nome = nome.trim(),
                             dias = textoDosDiasSelecionados(diasSelecionados),
                             ativo = ativo
