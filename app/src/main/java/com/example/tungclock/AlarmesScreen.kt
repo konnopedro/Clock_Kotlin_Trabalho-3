@@ -42,6 +42,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
@@ -59,6 +61,16 @@ private val Texto = Color(0xFFF6EBDD)
 private val TextoSecundario = Color(0xFFBCA18A)
 private val Borda = Color(0xFF493427)
 
+private fun formatarEntradaHorario(entrada: TextFieldValue): TextFieldValue {
+    val cursorOriginal = entrada.selection.start.coerceIn(0, entrada.text.length)
+    val digitosAntesDoCursor = entrada.text.take(cursorOriginal).count { it.isDigit() }
+    val digitos = entrada.text.filter { it.isDigit() }.take(4)
+    val formatado = if (digitos.length <= 2) digitos else digitos.take(2) + ":" + digitos.drop(2)
+    val cursorFormatado = if (digitosAntesDoCursor <= 2) digitosAntesDoCursor else digitosAntesDoCursor + 1
+    return TextFieldValue(formatado, selection = TextRange(cursorFormatado.coerceIn(0, formatado.length)))
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlarmesScreen(
@@ -68,7 +80,7 @@ fun AlarmesScreen(
     onAbrirDetalhes: (Int) -> Unit
 ) {
     var mostrarNovoAlarme by remember { mutableStateOf(false) }
-    var novoHorario by remember { mutableStateOf("07:00") }
+    var novoHorario by remember { mutableStateOf(TextFieldValue("07:00")) }
     var novoNome by remember { mutableStateOf("") }
     var novosDias by remember { mutableStateOf("Todos os dias") }
     var erro by remember { mutableStateOf("") }
@@ -99,7 +111,7 @@ fun AlarmesScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    novoHorario = "07:00"
+                    novoHorario = TextFieldValue("07:00")
                     novoNome = ""
                     novosDias = "Todos os dias"
                     erro = ""
@@ -114,7 +126,7 @@ fun AlarmesScreen(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().background(Fundo).padding(innerPadding).padding(start = 18.dp, top = 24.dp, end = 18.dp, bottom = 12.dp),
+            modifier = Modifier.fillMaxSize().background(Fundo).padding(innerPadding).padding(start = 18.dp, top = 40.dp, end = 18.dp, bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -194,10 +206,11 @@ fun AlarmesScreen(
                     Text("Defina quando você quer ser lembrado.", color = TextoSecundario, fontSize = 13.sp)
                     OutlinedTextField(
                         value = novoHorario,
-                        onValueChange = { novoHorario = it },
+                        onValueChange = { novoHorario = formatarEntradaHorario(it) },
                         label = { Text("Horário (HH:mm)") },
                         placeholder = { Text("07:30") },
                         singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Texto, unfocusedTextColor = Texto, focusedLabelColor = MadeiraClara, unfocusedLabelColor = TextoSecundario, focusedBorderColor = Madeira, unfocusedBorderColor = Borda, cursorColor = MadeiraClara)
                     )
@@ -224,13 +237,13 @@ fun AlarmesScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    val horarioValido = novoHorario.matches(Regex("^([01]?[0-9]|2[0-3]):[0-5][0-9]$"))
+                    val horarioValido = novoHorario.text.matches(Regex("^([01][0-9]|2[0-3]):[0-5][0-9]$"))
                     if (!horarioValido) {
                         erro = "Use um horário válido, como 07:30."
                     } else if (novoNome.isBlank()) {
                         erro = "Digite um nome para o alarme."
                     } else {
-                        val novoAlarme = Alarme(horario = novoHorario, nome = novoNome.trim(), dias = novosDias.ifBlank { "Todos os dias" }, ativo = true)
+                        val novoAlarme = Alarme(horario = novoHorario.text, nome = novoNome.trim(), dias = novosDias.ifBlank { "Todos os dias" }, ativo = true)
                         scope.launch {
                             val salvo = withContext(Dispatchers.IO) {
                                 val id = alarmeDao.inserir(novoAlarme)

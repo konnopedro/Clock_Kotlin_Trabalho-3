@@ -126,7 +126,7 @@ fun FusosScreen(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().background(Fundo).padding(innerPadding).padding(start = 18.dp, top = 24.dp, end = 18.dp, bottom = 12.dp),
+            modifier = Modifier.fillMaxSize().background(Fundo).padding(innerPadding).padding(start = 18.dp, top = 40.dp, end = 18.dp, bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Text("Acompanhe o horário em qualquer lugar do mundo.", color = TextoSecundario, fontSize = 13.sp)
