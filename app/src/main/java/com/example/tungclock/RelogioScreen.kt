@@ -14,26 +14,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Public
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,12 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -67,13 +55,6 @@ private val Texto = Color(0xFFF6EBDD)
 private val TextoSecundario = Color(0xFFBCA18A)
 private val Borda = Color(0xFF493427)
 
-private data class CidadeDisponivel(
-    val cidade: String,
-    val pais: String,
-    val zona: String,
-    val offset: Int
-)
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RelogioScreen(
@@ -83,60 +64,30 @@ fun RelogioScreen(
     onAbrirFusos: () -> Unit,
     onAbrirDetalhesFuso: (Int) -> Unit
 ) {
-    var horaAtual by remember {
-        mutableStateOf(ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")))
-    }
-    var mostrarCidades by remember { mutableStateOf(false) }
-    var erroFuso by remember { mutableStateOf("") }
-    val context = LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val fusoDao = remember { database.fusoHorarioDao() }
-    val scope = rememberCoroutineScope()
-
-    val cidadesDisponiveis = remember {
-        listOf(
-            CidadeDisponivel("São Paulo", "Brasil", "America/Sao_Paulo", -3),
-            CidadeDisponivel("Nova York", "Estados Unidos", "America/New_York", -4),
-            CidadeDisponivel("Londres", "Reino Unido", "Europe/London", 0),
-            CidadeDisponivel("Tóquio", "Japão", "Asia/Tokyo", 9),
-            CidadeDisponivel("Paris", "França", "Europe/Paris", 1),
-            CidadeDisponivel("Sydney", "Austrália", "Australia/Sydney", 10),
-            CidadeDisponivel("Dubai", "Emirados Árabes", "Asia/Dubai", 4),
-            CidadeDisponivel("Lisboa", "Portugal", "Europe/Lisbon", 0)
-        )
-    }
-
+    var horaAtual by remember { mutableStateOf(ZonedDateTime.now(ZoneId.of("America/Sao_Paulo"))) }
     LaunchedEffect(Unit) {
         while (true) {
             horaAtual = ZonedDateTime.now(ZoneId.of("America/Sao_Paulo"))
             delay(1000)
         }
     }
-
     val hora = horaAtual.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-    val data = horaAtual.format(
-        DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", Locale("pt", "BR"))
-    ).replaceFirstChar { it.titlecase(Locale("pt", "BR")) }
+    val data = horaAtual.format(DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", Locale("pt", "BR")))
+        .replaceFirstChar { it.titlecase(Locale("pt", "BR")) }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Fundo)
-            .padding(paddingValues)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 22.dp),
+        modifier = Modifier.fillMaxSize().background(Fundo).padding(paddingValues)
+            .verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 22.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Text("TUN TUN", color = MadeiraClara, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 3.sp)
-                Text("CLOCK", color = Texto, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp)
+                Text("TUN TUN", color = MadeiraClara, fontSize = 13.sp, fontWeight = FontWeight.Bold, letterSpacing = 3.sp)
+                Text("CLOCK", color = Texto, fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp)
             }
-            Text("●  AO VIVO", color = Color(0xFF9FB79A), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            Card(shape = RoundedCornerShape(50), colors = CardDefaults.cardColors(containerColor = Color(0xFF283328)), border = BorderStroke(1.dp, Color(0xFF52664B))) {
+                Text("●  AO VIVO", Modifier.padding(horizontal = 12.dp, vertical = 8.dp), color = Color(0xFFB4D1A6), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+            }
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -144,147 +95,81 @@ fun RelogioScreen(
             Text(data, color = TextoSecundario, fontSize = 14.sp)
         }
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(containerColor = CardFundo),
-            border = BorderStroke(1.dp, Borda)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 26.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text("HORÁRIO DE BRASÍLIA", color = MadeiraClara, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.7.sp)
+        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(30.dp), colors = CardDefaults.cardColors(containerColor = CardFundo), border = BorderStroke(1.dp, Borda)) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 28.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("HORÁRIO DE BRASÍLIA", color = MadeiraClara, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
                 Text(hora, color = Texto, fontSize = 43.sp, fontWeight = FontWeight.Light, letterSpacing = 1.sp, textAlign = TextAlign.Center)
-                Text("◉   São Paulo, Brasil  ·  UTC−03:00", color = TextoSecundario, fontSize = 12.sp, textAlign = TextAlign.Center)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                    Icon(Icons.Default.Public, contentDescription = null, tint = Madeira, modifier = Modifier.height(16.dp).width(16.dp))
+                    Spacer(Modifier.width(7.dp))
+                    Text("São Paulo, Brasil  ·  UTC−03:00", color = TextoSecundario, fontSize = 12.sp, textAlign = TextAlign.Center)
+                }
             }
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text("Relógios mundiais", color = Texto, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text("Relógios mundiais", color = Texto, fontSize = 19.sp, fontWeight = FontWeight.Bold)
                     Text("A hora em outras cidades", color = TextoSecundario, fontSize = 12.sp)
                 }
-                IconButton(onClick = { erroFuso = ""; mostrarCidades = true }) {
-                    Icon(Icons.Default.Add, contentDescription = "Adicionar cidade", tint = MadeiraClara)
-                }
+                IconButton(onClick = onAbrirFusos) { Icon(Icons.Default.Add, contentDescription = "Adicionar fuso horário", tint = MadeiraClara) }
             }
 
             if (fusos.isEmpty()) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = CardFundo),
-                    shape = RoundedCornerShape(20.dp),
-                    border = BorderStroke(1.dp, Borda)
-                ) {
+                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = CardFundo), border = BorderStroke(1.dp, Borda)) {
                     Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Ainda não há cidades", color = Texto, fontWeight = FontWeight.SemiBold)
-                        Text("Use o botão + para adicionar um relógio mundial.", color = TextoSecundario, fontSize = 13.sp)
+                        Text("Nenhuma cidade adicionada", color = Texto, fontWeight = FontWeight.SemiBold)
+                        Text("Adicione um fuso para acompanhar outros horários.", color = TextoSecundario, fontSize = 13.sp)
+                        FilledTonalButton(onClick = onAbrirFusos) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Spacer(Modifier.width(6.dp))
+                            Text("Adicionar cidade")
+                        }
                     }
                 }
             } else {
                 fusos.forEach { fuso ->
-                    val horaCidade = remember(fuso.zona) {
-                        mutableStateOf(ZonedDateTime.now(ZoneId.of(fuso.zona)))
-                    }
+                    var horaFuso by remember(fuso.id) { mutableStateOf(ZonedDateTime.now(ZoneId.of(fuso.zona))) }
                     LaunchedEffect(fuso.zona) {
                         while (true) {
-                            horaCidade.value = ZonedDateTime.now(ZoneId.of(fuso.zona))
+                            horaFuso = ZonedDateTime.now(ZoneId.of(fuso.zona))
                             delay(1000)
                         }
                     }
-                    Card(
-                        onClick = { onAbrirDetalhesFuso(fuso.id) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = CardFundo),
-                        border = BorderStroke(1.dp, Borda)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 17.dp, vertical = 15.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Card(onClick = { onAbrirDetalhesFuso(fuso.id) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = CardFundo), border = BorderStroke(1.dp, Borda)) {
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Text(fuso.cidade, color = Texto, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                                 Text(fuso.pais, color = TextoSecundario, fontSize = 12.sp)
+                                Text("UTC" + (if (fuso.offset >= 0) "+" else "") + fuso.offset, color = MadeiraClara, fontSize = 11.sp)
                             }
-                            Spacer(Modifier.width(10.dp))
-                            Text(
-                                horaCidade.value.format(DateTimeFormatter.ofPattern("HH:mm")),
-                                color = MadeiraClara,
-                                fontSize = 25.sp,
-                                fontWeight = FontWeight.Light
-                            )
+                            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(horaFuso.format(DateTimeFormatter.ofPattern("HH:mm")), color = Texto, fontSize = 24.sp, fontWeight = FontWeight.Medium)
+                                Text(horaFuso.format(DateTimeFormatter.ofPattern("EEE, d MMM", Locale("pt", "BR"))), color = TextoSecundario, fontSize = 11.sp)
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            Icon(Icons.Default.ArrowForward, contentDescription = "Ver detalhes", tint = Madeira)
                         }
                     }
                 }
-            }
-
-            OutlinedButton(
-                onClick = onAbrirFusos,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MadeiraClara),
-                border = BorderStroke(1.dp, Borda)
-            ) {
-                Icon(Icons.Default.Public, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Gerenciar relógios mundiais")
+                androidx.compose.material3.TextButton(onClick = onAbrirFusos, modifier = Modifier.fillMaxWidth()) {
+                    Text("Gerenciar cidades", color = MadeiraClara)
+                    Spacer(Modifier.width(6.dp))
+                    Icon(Icons.Default.ArrowForward, contentDescription = null, tint = MadeiraClara)
+                }
             }
         }
-    }
 
-    if (mostrarCidades) {
-        AlertDialog(
-            onDismissRequest = { mostrarCidades = false },
-            containerColor = CardFundo,
-            title = { Text("Adicionar cidade", color = Texto, fontWeight = FontWeight.Bold) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Escolha uma cidade para acompanhar o horário local.", color = TextoSecundario, fontSize = 13.sp)
-                    if (erroFuso.isNotBlank()) Text(erroFuso, color = Color(0xFFFF8A80), fontSize = 12.sp)
-                    LazyColumn {
-                        items(cidadesDisponiveis.filter { cidade -> fusos.none { it.zona == cidade.zona } }) { cidade ->
-                            TextButton(
-                                onClick = {
-                                    scope.launch {
-                                        try {
-                                            val salvo = withContext(Dispatchers.IO) {
-                                                val id = fusoDao.inserir(
-                                                    FusoHorario(cidade = cidade.cidade, pais = cidade.pais, zona = cidade.zona, offset = cidade.offset)
-                                                )
-                                                fusoDao.buscarPorId(id.toInt())
-                                            }
-                                            salvo?.let { fusos.add(it) }
-                                            mostrarCidades = false
-                                        } catch (e: Exception) {
-                                            erroFuso = "Não foi possível adicionar a cidade. Tente novamente."
-                                        }
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Column(Modifier.fillMaxWidth()) {
-                                    Text(cidade.cidade, color = Texto, fontWeight = FontWeight.SemiBold)
-                                    Text(cidade.pais, color = TextoSecundario, fontSize = 12.sp)
-                                }
-                            }
-                        }
-                    }
+        Card(onClick = onAbrirAlarmes, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF38271D)), border = BorderStroke(1.dp, Color(0xFF704B32))) {
+            Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                Text("◉", color = MadeiraClara, fontSize = 27.sp)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Seus alarmes", color = Texto, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                    Text("Crie horários para sua rotina", color = TextoSecundario, fontSize = 12.sp)
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = { mostrarCidades = false }) {
-                    Text("Fechar", color = MadeiraClara)
-                }
+                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = MadeiraClara)
             }
-        )
+        }
     }
 }
