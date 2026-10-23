@@ -1,206 +1,116 @@
-⏰ Tun Tun Clock — Trabalho 2
+# Tun Tun Clock
 
-Aplicativo de relógio desenvolvido em Kotlin utilizando Jetpack Compose para a disciplina de Desenvolvimento de Aplicativos Móveis.
+Aplicativo Android de relógio desenvolvido em **Kotlin** com **Jetpack Compose** para a disciplina de Desenvolvimento de Aplicativos Móveis. O projeto reúne ferramentas para acompanhar horários e gerenciar alarmes e fusos horários, com dados salvos localmente no dispositivo.
 
-Este projeto é uma evolução do aplicativo desenvolvido no Trabalho 1, adicionando navegação real, listas dinâmicas, cadastro e remoção de itens e telas de detalhes.
+## Funcionalidades
 
-📱 Sobre o projeto
+- **Relógio:** visualização do horário.
+- **Cronômetro:** acompanhamento de tempo decorrido.
+- **Timer:** contagem regressiva.
+- **Alarmes:** listar, cadastrar, editar, ativar/desativar e excluir alarmes.
+- **Fusos horários:** cadastrar e excluir localidades, consultar o horário atual e comparar com o horário de São Paulo.
+- **Persistência local:** alarmes e fusos horários são armazenados em um banco de dados Room e continuam disponíveis depois que o aplicativo é fechado e aberto novamente.
 
-O Tun Tun Clock possui três funcionalidades principais:
+## Tecnologias utilizadas
 
-🕐 Relógio
-⏱️ Cronômetro
-⏳ Timer
+- Kotlin
+- Android Studio
+- Jetpack Compose e Material 3
+- Navigation Compose
+- Room
+- KSP
+- Gradle
+- JDK 17
 
-No Trabalho 2, o aplicativo foi ampliado com:
+## Organização do projeto
 
-⏰ Gerenciamento de alarmes;
-🌎 Gerenciamento de fusos horários;
-📋 Listas com LazyColumn, Card e mutableStateListOf;
-➕ Adição de novos itens;
-🗑️ Remoção de itens;
-🔎 Telas de detalhes;
-✏️ Edição de alarmes;
-🧭 Navegação com NavigationBar, NavController e NavHost;
-🔙 Botões de voltar utilizando navController.popBackStack().
-🧭 Navegação
+Os principais arquivos da aplicação ficam em `app/src/main/java/com/example/tungclock/`:
 
-O aplicativo possui uma NavigationBar para as principais áreas:
+| Arquivo | Responsabilidade |
+| --- | --- |
+| `MainActivity.kt` | Ponto de entrada da aplicação. |
+| `AppNavigation.kt` | Organiza a navegação entre as telas e carrega os dados persistidos. |
+| `RelogioScreen.kt` | Tela do relógio. |
+| `CronometroScreen.kt` | Tela do cronômetro. |
+| `TimerScreen.kt` | Tela do timer. |
+| `AlarmesScreen.kt` | Lista, cadastro e exclusão de alarmes. |
+| `DetalheAlarmeScreen.kt` | Consulta e edição de um alarme selecionado. |
+| `FusosScreen.kt` | Lista, cadastro e exclusão de fusos horários. |
+| `DetalheFusoScreen.kt` | Exibe o horário atual do fuso e a comparação com São Paulo. |
+| `Model.kt` | Define as entidades `Alarme` e `FusoHorario` do Room. |
+| `AlarmeDao.kt` | Operações de consulta e alteração dos alarmes no banco. |
+| `FusoHorarioDao.kt` | Operações de consulta e alteração dos fusos no banco. |
+| `AppDataBase.kt` | Configuração e instância singleton do banco de dados. |
 
-Relógio | Cronômetro | Timer
+## Persistência com Room
 
+O banco local utilizado pela aplicação é `tungclock_database`. Ele contém as entidades `Alarme` e `FusoHorario`, com identificadores gerados automaticamente.
 
-A partir da tela de Relógio também é possível acessar:
+Os DAOs disponibilizam operações para inserir, listar, buscar por ID, atualizar e excluir registros. Ao iniciar o aplicativo, os dados são carregados do banco. Exemplos iniciais são inseridos apenas quando a tabela correspondente está vazia. As operações de acesso ao banco são executadas em `Dispatchers.IO`.
 
-Alarmes
- └── Detalhes do Alarme
+## Como executar
 
-Fusos Horários
- └── Detalhes do Fuso
+### Pré-requisitos
 
+- Android Studio;
+- JDK 17;
+- Android SDK configurado;
+- Emulador Android ou dispositivo físico.
 
-As rotas são organizadas através do objeto Rotas e controladas pelo Navigation Compose.
+### Passos
 
-⏰ Alarmes
+1. Clone o repositório:
 
-A tela de Alarmes permite:
+   ```bash
+   git clone https://github.com/konnopedro/Clock_Kotlin_Trabalho-3.git
+   ```
 
-Adicionar novos alarmes;
-Visualizar os alarmes cadastrados;
-Remover alarmes;
-Abrir os detalhes de um alarme;
-Editar as informações;
-Ativar ou desativar um alarme.
+2. Abra a pasta do projeto no Android Studio.
+3. Aguarde a sincronização do Gradle.
+4. Execute o aplicativo em um emulador ou dispositivo Android.
 
-Os alarmes são armazenados em uma lista reativa utilizando mutableStateListOf.
+## Evidências do projeto
 
-🌎 Fusos Horários
+Adicione as capturas de tela ou gravações nos espaços abaixo. As evidências devem ser produzidas com o aplicativo executando e mostrar as funcionalidades descritas.
 
-A tela de Fusos Horários permite:
+### 1. Tela principal
 
-Adicionar uma nova localidade;
-Informar cidade, país e zona;
-Visualizar os fusos cadastrados;
-Remover fusos;
-Abrir os detalhes de um fuso.
+**O que colocar:** captura da navegação inferior mostrando as áreas Relógio, Cronômetro e Timer.
 
-Na tela de detalhes são exibidos os horários da localidade e de São Paulo, além da diferença entre os horários.
+<!-- Adicionar aqui a imagem da tela principal. -->
 
-✨ Complexidade adicional
+### 2. Alarmes e edição
 
-As telas de detalhes possuem funcionalidades além da simples exibição dos dados.
+**O que colocar:** captura da lista de alarmes e da tela de detalhes durante a edição de um alarme. Se possível, mostre um alarme cadastrado por você.
 
-Nos Detalhes do Alarme, é possível editar as informações do item diretamente.
+<!-- Adicionar aqui as imagens da lista e da edição de alarmes. -->
 
-Nos Detalhes do Fuso, o aplicativo calcula a diferença de horário em relação a São Paulo e apresenta o horário atual da localidade.
+### 3. Fusos horários
 
-📚 Documentação do Trabalho 2
-1. 🔄 Evolução do Trabalho 1
+**O que colocar:** captura da lista de fusos cadastrados e da tela de detalhes mostrando o horário da localidade e a comparação com São Paulo.
 
-No Trabalho 1, o aplicativo possuía as telas de Relógio, Cronômetro e Timer, com uma interface inicial e botões de navegação.
+<!-- Adicionar aqui as imagens da lista e dos detalhes de fusos horários. -->
 
-Para o Trabalho 2, essas telas foram mantidas e evoluídas, passando a fazer parte de uma navegação real. Também foram adicionadas as telas de Alarmes, Detalhes do Alarme, Fusos Horários e Detalhes do Fuso.
+### 4. Persistência após fechar e abrir o aplicativo
 
-As principais mudanças foram:
+**O que colocar:** primeiro, uma captura mostrando um alarme e um fuso cadastrados ou um alarme editado. Depois, feche completamente o aplicativo, abra-o novamente e adicione uma segunda captura mostrando que os dados continuam salvos.
 
-Implementação do NavigationBar;
-Criação do NavHost;
-Organização das rotas;
-Criação de duas listas dinâmicas;
-Cadastro e remoção de itens;
-Criação das telas de detalhes;
-Passagem de dados entre as telas;
-Edição de alarmes;
-Cálculo de diferença entre fusos horários.
+<!-- Adicionar aqui as capturas antes e depois de reabrir o aplicativo. -->
 
+### 5. Exclusão persistente
 
-2. 📱 Novas telas e suas funções
-Alarmes
+**O que colocar:** capture a lista após excluir um alarme ou fuso e, depois de fechar e reabrir o aplicativo, mostre que o item excluído não reapareceu.
 
-A tela permite cadastrar, visualizar, remover e editar alarmes.
+<!-- Adicionar aqui as capturas que demonstram a exclusão antes e depois de reabrir o aplicativo. -->
 
-Detalhes do Alarme
+### 6. Vídeo de demonstração (opcional)
 
-Mostra as informações do alarme selecionado e permite editar seus dados.
+**O que colocar:** link de uma gravação curta demonstrando cadastro, edição, exclusão e persistência após reiniciar o aplicativo.
 
-Fusos Horários
+<!-- Adicionar aqui o link do vídeo, se houver. -->
 
-Permite cadastrar, visualizar e remover diferentes localidades.
+## Disciplina
 
-Detalhes do Fuso
+**Desenvolvimento de Aplicativos Móveis — Trabalho 3**
 
-Mostra as informações do fuso selecionado, seu horário atual e sua diferença em relação a São Paulo.
-
-As telas foram escolhidas porque estão diretamente relacionadas ao tema principal do aplicativo: controle e acompanhamento de horários.
-
-📸 Prints das telas
-
-<img width="960" height="1280" alt="1f65c36e-ed91-4f1c-bd55-79799e36dc1e" src="https://github.com/user-attachments/assets/59e58dba-9202-44cb-8532-4901cd9b5803" />
-<img width="960" height="1280" alt="88bc5084-33ed-4ad0-af62-e35a91328b4a" src="https://github.com/user-attachments/assets/4dfa48d4-456a-4a10-9353-cda6ffb2aa18" />
-<img width="960" height="1280" alt="7bb38787-ac14-40f8-87ed-9fb4165285be" src="https://github.com/user-attachments/assets/5ab0ddfb-0e04-4c59-971c-c5fdd86237e0" />
-<img width="960" height="1280" alt="42806b45-8251-46c8-bf28-bda749c9ef87" src="https://github.com/user-attachments/assets/08ba4975-10a6-4ac0-8dc6-d1b0d07dac11" />
-
-
-3. 🏗️ Organização do código e navegação
-
-A navegação foi centralizada no arquivo AppNavigation.kt.
-
-Foi criado um objeto Rotas para organizar os caminhos utilizados pelo aplicativo.
-
-As listas de Alarmes e Fusos Horários são mantidas no nível da navegação utilizando mutableStateListOf. Dessa forma, as telas de lista e de detalhes conseguem trabalhar com os mesmos dados.
-
-Para abrir os detalhes, o ID do item selecionado é enviado através da rota. A tela de detalhes utiliza esse ID para localizar o item correto.
-
-Essa organização foi escolhida para facilitar a comunicação entre as telas e manter a navegação centralizada.
-
-📸 Registro da navegação
-[Screen_recording_20261008_101007.webm](https://github.com/user-attachments/assets/619351e2-493f-4fd2-b30a-3472f4be4813)
-
-4. ⭐ Complexidade extra
-
-O requisito do Trabalho 2 determina que pelo menos uma tela de detalhes faça algo além de simplesmente mostrar os campos do item.
-
-No projeto, foram utilizadas duas funcionalidades adicionais:
-
-Detalhes do Alarme: permite editar as informações do alarme diretamente na tela e salvar as alterações.
-
-Detalhes do Fuso: utiliza os dados do fuso para calcular a diferença de horário em relação a São Paulo e apresentar o horário atual da localidade.
-
-Essa escolha foi feita para que as telas de detalhes tivessem uma função real dentro do aplicativo, em vez de apenas repetir os dados cadastrados.
-
-📸 Registro da funcionalidade
-[Screen_recording_20261008_101330.webm](https://github.com/user-attachments/assets/dac878b4-c84e-4bcd-86bc-283f5d025bb9)
-
-5. 🧑‍💻 Dificuldades encontradas
-
-Durante o desenvolvimento, os integrantes não encontraram dificuldades relacionadas à implementação das novas funcionalidades.
-
-
-🛠️ Tecnologias utilizadas
-Kotlin
-Android Studio
-Jetpack Compose
-Material 3
-Navigation Compose
-AndroidX
-Gradle
-📂 Estrutura principal
-app/
-└── src/
-    └── main/
-        ├── java/com/example/tungclock/
-        │   ├── MainActivity.kt
-        │   ├── AppNavigation.kt
-        │   ├── RelogioScreen.kt
-        │   ├── CronometroScreen.kt
-        │   ├── TimerScreen.kt
-        │   ├── AlarmesScreen.kt
-        │   ├── DetalheAlarmeScreen.kt
-        │   ├── FusosScreen.kt
-        │   └── DetalheFusoScreen.kt
-        │
-        └── res/
-
-🚀 Como executar
-Pré-requisitos
-Android Studio;
-JDK 17;
-Android SDK;
-Emulador Android ou dispositivo físico.
-Clone o repositório
-git clone https://github.com/konnopedro/Clock_Kotlin_Trabalho-2.git
-
-
-Abra o projeto no Android Studio, aguarde a sincronização do Gradle e execute o aplicativo em um dispositivo ou emulador Android.
-
-👥 Integrantes
-Daniel Luiz — Relógio
-Daniel Rocha — Cronômetro
-Pedro Konno — Timer
-🎓 Disciplina
-
-Desenvolvimento de Aplicativos Móveis
-
-Trabalho 2 — MAF (Mínimo Aplicativo Funcional)
-
-Projeto desenvolvido utilizando Kotlin + Jetpack Compose.
+Projeto desenvolvido em Kotlin com Jetpack Compose.
