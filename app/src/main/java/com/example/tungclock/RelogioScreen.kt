@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -154,7 +155,7 @@ fun RelogioScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text("◉", color = Roxo, fontSize = 13.sp)
-                    Spacer(Modifier.padding(horizontal = 3.dp))
+                    Spacer(Modifier.width(6.dp))
                     Text(
                         text = "São Paulo, Brasil  ·  UTC−03:00",
                         color = TextoSecundario,
