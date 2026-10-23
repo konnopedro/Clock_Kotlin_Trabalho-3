@@ -19,8 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -100,7 +98,7 @@ fun RelogioScreen(
                 Text("HORÁRIO DE BRASÍLIA", color = MadeiraClara, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
                 Text(hora, color = Texto, fontSize = 43.sp, fontWeight = FontWeight.Light, letterSpacing = 1.sp, textAlign = TextAlign.Center)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                    Icon(Icons.Default.Public, contentDescription = null, tint = Madeira, modifier = Modifier.height(16.dp).width(16.dp))
+                    Text("◎", color = Madeira, fontSize = 16.sp)
                     Spacer(Modifier.width(7.dp))
                     Text("São Paulo, Brasil  ·  UTC−03:00", color = TextoSecundario, fontSize = 12.sp, textAlign = TextAlign.Center)
                 }
@@ -149,14 +147,14 @@ fun RelogioScreen(
                                 Text(horaFuso.format(DateTimeFormatter.ofPattern("EEE, d MMM", Locale("pt", "BR"))), color = TextoSecundario, fontSize = 11.sp)
                             }
                             Spacer(Modifier.width(8.dp))
-                            Icon(Icons.Default.ArrowForward, contentDescription = "Ver detalhes", tint = Madeira)
+                            Text("›", color = Madeira, fontSize = 25.sp)
                         }
                     }
                 }
                 androidx.compose.material3.TextButton(onClick = onAbrirFusos, modifier = Modifier.fillMaxWidth()) {
                     Text("Gerenciar cidades", color = MadeiraClara)
                     Spacer(Modifier.width(6.dp))
-                    Icon(Icons.Default.ArrowForward, contentDescription = null, tint = MadeiraClara)
+                    Text("›", color = MadeiraClara, fontSize = 25.sp)
                 }
             }
         }
@@ -168,7 +166,7 @@ fun RelogioScreen(
                     Text("Seus alarmes", color = Texto, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     Text("Crie horários para sua rotina", color = TextoSecundario, fontSize = 12.sp)
                 }
-                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = MadeiraClara)
+                Text("›", color = MadeiraClara, fontSize = 25.sp)
             }
         }
     }
