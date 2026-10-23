@@ -22,6 +22,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +46,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
@@ -60,6 +64,14 @@ private val MadeiraClara = Color(0xFFE0B17A)
 private val Texto = Color(0xFFF6EBDD)
 private val TextoSecundario = Color(0xFFBCA18A)
 private val Borda = Color(0xFF493427)
+private val DiasSemana = listOf("Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom")
+
+private fun textoRepeticao(dias: Set<String>): String = when {
+    dias.isEmpty() -> "Uma vez"
+    dias.size == 7 -> "Todos os dias"
+    dias == DiasSemana.take(5).toSet() -> "Segunda a sexta"
+    else -> DiasSemana.filter { it in dias }.joinToString(", ")
+}
 
 private fun formatarEntradaHorario(entrada: TextFieldValue): TextFieldValue {
     val cursorOriginal = entrada.selection.start.coerceIn(0, entrada.text.length)
@@ -82,7 +94,7 @@ fun AlarmesScreen(
     var mostrarNovoAlarme by remember { mutableStateOf(false) }
     var novoHorario by remember { mutableStateOf(TextFieldValue("07:00")) }
     var novoNome by remember { mutableStateOf("") }
-    var novosDias by remember { mutableStateOf("Todos os dias") }
+    var novosDias by remember { mutableStateOf(DiasSemana.toSet()) }
     var erro by remember { mutableStateOf("") }
     var alarmeParaExcluir by remember { mutableStateOf<Alarme?>(null) }
 
@@ -113,7 +125,7 @@ fun AlarmesScreen(
                 onClick = {
                     novoHorario = TextFieldValue("07:00")
                     novoNome = ""
-                    novosDias = "Todos os dias"
+                    novosDias = DiasSemana.toSet()
                     erro = ""
                     mostrarNovoAlarme = true
                 },
@@ -126,7 +138,7 @@ fun AlarmesScreen(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().background(Fundo).padding(innerPadding).padding(start = 18.dp, top = 40.dp, end = 18.dp, bottom = 12.dp),
+            modifier = Modifier.fillMaxSize().background(Fundo).padding(innerPadding).padding(start = 18.dp, top = 22.dp, end = 18.dp, bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -210,7 +222,7 @@ fun AlarmesScreen(
                         label = { Text("Horário (HH:mm)") },
                         placeholder = { Text("07:30") },
                         singleLine = true,
-                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Texto, unfocusedTextColor = Texto, focusedLabelColor = MadeiraClara, unfocusedLabelColor = TextoSecundario, focusedBorderColor = Madeira, unfocusedBorderColor = Borda, cursorColor = MadeiraClara)
                     )
@@ -223,15 +235,28 @@ fun AlarmesScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Texto, unfocusedTextColor = Texto, focusedLabelColor = MadeiraClara, unfocusedLabelColor = TextoSecundario, focusedBorderColor = Madeira, unfocusedBorderColor = Borda, cursorColor = MadeiraClara)
                     )
-                    OutlinedTextField(
-                        value = novosDias,
-                        onValueChange = { novosDias = it },
-                        label = { Text("Repetição") },
-                        placeholder = { Text("Todos os dias") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Texto, unfocusedTextColor = Texto, focusedLabelColor = MadeiraClara, unfocusedLabelColor = TextoSecundario, focusedBorderColor = Madeira, unfocusedBorderColor = Borda, cursorColor = MadeiraClara)
-                    )
+                    Text("Repetir", color = Texto, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text(textoRepeticao(novosDias), color = TextoSecundario, fontSize = 12.sp)
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        DiasSemana.chunked(4).forEach { linha ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                linha.forEach { dia ->
+                                    val selecionado = dia in novosDias
+                                    FilterChip(
+                                        selected = selecionado,
+                                        onClick = { novosDias = if (selecionado) novosDias - dia else novosDias + dia },
+                                        label = { Text(dia, fontSize = 11.sp) },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = MadeiraClara,
+                                            selectedLabelColor = Fundo,
+                                            containerColor = CardFundo,
+                                            labelColor = Texto
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
                     if (erro.isNotBlank()) Text(erro, color = Color(0xFFE18A75), fontSize = 12.sp)
                 }
             },
@@ -243,7 +268,7 @@ fun AlarmesScreen(
                     } else if (novoNome.isBlank()) {
                         erro = "Digite um nome para o alarme."
                     } else {
-                        val novoAlarme = Alarme(horario = novoHorario.text, nome = novoNome.trim(), dias = novosDias.ifBlank { "Todos os dias" }, ativo = true)
+                        val novoAlarme = Alarme(horario = novoHorario.text, nome = novoNome.trim(), dias = textoRepeticao(novosDias), ativo = true)
                         scope.launch {
                             val salvo = withContext(Dispatchers.IO) {
                                 val id = alarmeDao.inserir(novoAlarme)
