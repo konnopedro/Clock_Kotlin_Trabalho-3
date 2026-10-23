@@ -1,4 +1,4 @@
-⏰ Tun Tun Clock — Trabalho 2
+⏰ Tun Tun Clock — Trabalho 3
 
 Aplicativo de relógio desenvolvido em Kotlin utilizando Jetpack Compose para a disciplina de Desenvolvimento de Aplicativos Móveis.
 
@@ -204,3 +204,50 @@ Desenvolvimento de Aplicativos Móveis
 Trabalho 2 — MAF (Mínimo Aplicativo Funcional)
 
 Projeto desenvolvido utilizando Kotlin + Jetpack Compose.
+
+
+---
+
+# Trabalho 3 — Persistência com Room
+
+Nesta etapa, o aplicativo passou a utilizar o Room para manter os alarmes e fusos horários salvos no banco de dados local do dispositivo. Assim, os registros não dependem apenas das listas em memória e continuam disponíveis ao fechar e abrir o aplicativo novamente.
+
+## Organização da persistência
+
+- **Model.kt:** define as entidades `Alarme` e `FusoHorario`, ambas com chave primária gerada automaticamente.
+- **AlarmeDao.kt:** disponibiliza operações para inserir, listar, buscar por ID, atualizar e excluir alarmes.
+- **FusoHorarioDao.kt:** disponibiliza as mesmas operações para fusos horários.
+- **AppDataBase.kt:** configura o banco `tungclock_database`, registra as duas entidades e fornece uma instância singleton.
+- **AppNavigation.kt:** carrega os registros do banco ao iniciar e apresenta dados iniciais somente quando as tabelas estão vazias.
+- **AlarmesScreen.kt / FusosScreen.kt:** salvam novos registros e removem registros do banco.
+- **DetalheAlarmeScreen.kt:** busca o alarme pelo ID recebido na rota e persiste as alterações.
+- **DetalheFusoScreen.kt:** busca o fuso pelo ID recebido na rota.
+
+As consultas e operações de escrita são executadas em `Dispatchers.IO`, evitando realizar o acesso ao banco na thread principal.
+
+## Dependências
+
+O projeto utiliza as dependências `room-runtime` e `room-ktx`, com o processador `room-compiler` configurado por meio do KSP. As versões ficam centralizadas em `gradle/libs.versions.toml`.
+
+## Roteiro de validação da persistência
+
+Antes da entrega, validar no emulador ou dispositivo:
+
+1. Abrir o aplicativo e confirmar que os alarmes e fusos iniciais aparecem.
+2. Cadastrar um alarme e um fuso horário.
+3. Editar um alarme e salvar a alteração.
+4. Excluir um alarme e um fuso horário.
+5. Fechar completamente o aplicativo e abri-lo novamente.
+6. Confirmar que os cadastros e alterações continuam salvos e que os itens excluídos não reaparecem.
+
+**Evidências do Trabalho 3:** adicionar capturas de tela ou uma gravação mostrando o cadastro, a edição, a exclusão e, principalmente, a persistência após fechar e reabrir o aplicativo. Não marcar essa validação como concluída até realizá-la no dispositivo.
+
+## Como executar
+
+Clone este repositório:
+
+```bash
+git clone https://github.com/konnopedro/Clock_Kotlin_Trabalho-3.git
+```
+
+Abra o projeto no Android Studio, aguarde a sincronização do Gradle e execute em um emulador ou dispositivo Android.
