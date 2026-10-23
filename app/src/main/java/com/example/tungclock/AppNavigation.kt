@@ -80,7 +80,7 @@ fun AppNavigation() {
         fusos.addAll(fusosSalvos)
     }
 
-    val mostrarBarra = rotaAtual in setOf(Rotas.RELOGIO, Rotas.ALARMES, Rotas.CRONOMETRO, Rotas.TIMER)
+    val mostrarBarra = rotaAtual == Rotas.RELOGIO || rotaAtual == Rotas.ALARMES || rotaAtual == Rotas.CRONOMETRO || rotaAtual == Rotas.TIMER
 
     Scaffold(
         containerColor = Fundo,
