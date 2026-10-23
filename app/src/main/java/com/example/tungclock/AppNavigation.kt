@@ -98,28 +98,28 @@ fun AppNavigation() {
                         NavigationBarItem(
                             selected = rotaAtual == Rotas.RELOGIO,
                             onClick = { navController.navigate(Rotas.RELOGIO) { popUpTo(Rotas.RELOGIO) { inclusive = false }; launchSingleTop = true } },
-                            icon = { Text("◷") },
+                            icon = { Text("🕑") },
                             label = { Text("Relógio") },
                             colors = NavigationBarItemDefaults.colors(selectedIconColor = Madeira, selectedTextColor = Madeira, unselectedIconColor = TextoBranco, unselectedTextColor = TextoInativo, indicatorColor = Indicador)
                         )
                         NavigationBarItem(
                             selected = rotaAtual == Rotas.ALARMES,
                             onClick = { navController.navigate(Rotas.ALARMES) { launchSingleTop = true } },
-                            icon = { Text("◉") },
+                            icon = { Text("⏰") },
                             label = { Text("Alarmes") },
                             colors = NavigationBarItemDefaults.colors(selectedIconColor = Madeira, selectedTextColor = Madeira, unselectedIconColor = TextoBranco, unselectedTextColor = TextoInativo, indicatorColor = Indicador)
                         )
                         NavigationBarItem(
                             selected = rotaAtual == Rotas.CRONOMETRO,
                             onClick = { navController.navigate(Rotas.CRONOMETRO) { launchSingleTop = true } },
-                            icon = { Text("◴") },
+                            icon = { Text("⏱️") },
                             label = { Text("Cronômetro") },
                             colors = NavigationBarItemDefaults.colors(selectedIconColor = Madeira, selectedTextColor = Madeira, unselectedIconColor = TextoBranco, unselectedTextColor = TextoInativo, indicatorColor = Indicador)
                         )
                         NavigationBarItem(
                             selected = rotaAtual == Rotas.TIMER,
                             onClick = { navController.navigate(Rotas.TIMER) { launchSingleTop = true } },
-                            icon = { Text("⌛") },
+                            icon = { Text("⏲️") },
                             label = { Text("Timer") },
                             colors = NavigationBarItemDefaults.colors(selectedIconColor = Madeira, selectedTextColor = Madeira, unselectedIconColor = TextoBranco, unselectedTextColor = TextoInativo, indicatorColor = Indicador)
                         )

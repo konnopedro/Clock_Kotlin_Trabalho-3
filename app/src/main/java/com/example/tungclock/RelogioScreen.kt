@@ -98,7 +98,7 @@ fun RelogioScreen(
                 Text("HORÁRIO DE BRASÍLIA", color = MadeiraClara, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
                 Text(hora, color = Texto, fontSize = 43.sp, fontWeight = FontWeight.Light, letterSpacing = 1.sp, textAlign = TextAlign.Center)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                    Text("◎", color = Madeira, fontSize = 16.sp)
+                    Text("🕑", fontSize = 14.sp)
                     Spacer(Modifier.width(7.dp))
                     Text("São Paulo, Brasil  ·  UTC−03:00", color = TextoSecundario, fontSize = 12.sp, textAlign = TextAlign.Center)
                 }

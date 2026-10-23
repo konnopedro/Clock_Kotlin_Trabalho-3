@@ -161,7 +161,7 @@ fun FusosScreen(
                             border = BorderStroke(1.dp, Borda)
                         ) {
                             Row(Modifier.fillMaxWidth().padding(start = 17.dp, top = 16.dp, bottom = 16.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text("◎", modifier = Modifier.padding(end = 13.dp), color = MadeiraClara, fontSize = 22.sp)
+                                Text("🕑", modifier = Modifier.padding(end = 13.dp), fontSize = 16.sp)
                                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                     Text(fuso.cidade, color = Texto, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
                                     Text(fuso.pais, color = TextoSecundario, fontSize = 12.sp)
