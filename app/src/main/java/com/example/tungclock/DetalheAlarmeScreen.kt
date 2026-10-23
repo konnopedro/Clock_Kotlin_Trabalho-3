@@ -39,10 +39,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private val Fundo = Color(0xFF0B0E17)
-private val Roxo = Color(0xFF9B7CFF)
+private val Fundo = Color(0xFF17120F)
+private val Roxo = Color(0xFFC58B55)
 private val Texto = Color.White
-private val TextoSecundario = Color(0xFF9CA3B5)
+private val TextoSecundario = Color(0xFFBCA18A)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -10,18 +10,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 private val TunTunDarkColorScheme = darkColorScheme(
-    primary = Color(0xFF9B7CFF),
-    onPrimary = Color(0xFF160F2B),
-    secondary = Color(0xFFB5A2FF),
-    onSecondary = Color(0xFF211A38),
-    tertiary = Color(0xFF8BE0B0),
-    background = Color(0xFF0B0E17),
-    onBackground = Color(0xFFF6F4FF),
-    surface = Color(0xFF171D2B),
-    onSurface = Color(0xFFF6F4FF),
-    surfaceVariant = Color(0xFF252B3A),
-    onSurfaceVariant = Color(0xFFB3B8C8),
-    outline = Color(0xFF464D60)
+    primary = Color(0xFFC58B55),
+    onPrimary = Color(0xFF21160F),
+    secondary = Color(0xFFE0B17A),
+    onSecondary = Color(0xFF2A1B12),
+    tertiary = Color(0xFF9FB79A),
+    background = Color(0xFF17120F),
+    onBackground = Color(0xFFF6EBDD),
+    surface = Color(0xFF261D17),
+    onSurface = Color(0xFFF6EBDD),
+    surfaceVariant = Color(0xFF38291F),
+    onSurfaceVariant = Color(0xFFD0BBA7),
+    outline = Color(0xFF6E5140)
 )
 
 @Composable
@@ -46,13 +46,13 @@ fun TungOutlinedTextField(
         modifier = modifier,
         label = { Text(label) },
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = Color(0xFFF6F4FF),
-            unfocusedTextColor = Color(0xFFF6F4FF),
-            focusedLabelColor = Color(0xFF9B7CFF),
-            unfocusedLabelColor = Color(0xFF9CA3B5),
-            focusedBorderColor = Color(0xFF9B7CFF),
-            unfocusedBorderColor = Color(0xFF464D60),
-            cursorColor = Color(0xFF9B7CFF)
+            focusedTextColor = Color(0xFFF6EBDD),
+            unfocusedTextColor = Color(0xFFF6EBDD),
+            focusedLabelColor = Color(0xFFE0B17A),
+            unfocusedLabelColor = Color(0xFFBCA18A),
+            focusedBorderColor = Color(0xFFC58B55),
+            unfocusedBorderColor = Color(0xFF6E5140),
+            cursorColor = Color(0xFFE0B17A)
         )
     )
 }
