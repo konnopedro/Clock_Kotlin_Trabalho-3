@@ -40,6 +40,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import java.time.ZoneId
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 private val Fundo = Color(0xFF0B0E17)
@@ -76,6 +80,11 @@ fun FusosScreen(
     var erro by remember {
         mutableStateOf("")
     }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val database = remember { AppDatabase.getDatabase(context) }
+    val fusoDao = remember { database.fusoHorarioDao() }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         containerColor = Fundo,
@@ -255,35 +264,31 @@ fun FusosScreen(
                     }
 
                     try {
+                        ZoneId.of(zona.trim())
 
-                        ZoneId.of(zona)
+                        val novoFuso = FusoHorario(
+                            cidade = cidade.trim(),
+                            pais = pais.trim(),
+                            zona = zona.trim(),
+                            offset = offset
+                        )
 
-                        val novoId =
-                            if (fusos.isEmpty()) {
-                                1
-                            } else {
-                                fusos.maxOf {
-                                    it.id
-                                } + 1
+                        scope.launch {
+                            val fusoSalvo = withContext(Dispatchers.IO) {
+                                val id = fusoDao.inserir(novoFuso)
+                                fusoDao.buscarPorId(id.toInt())
                             }
 
-                        fusos.add(
-                            FusoHorario(
-                                id = novoId,
-                                cidade = cidade.trim(),
-                                pais = pais.trim(),
-                                zona = zona.trim(),
-                                offset = offset
-                            )
-                        )
+                            fusoSalvo?.let { fusos.add(it) }
+                        }
 
                         cidade = ""
                         pais = ""
                         zona = ""
                         offsetTexto = ""
+                        erro = ""
 
                     } catch (e: Exception) {
-
                         erro = "Zona inválida. Exemplo: America/Sao_Paulo"
                     }
                 },
@@ -383,7 +388,12 @@ fun FusosScreen(
 
                             IconButton(
                                 onClick = {
-                                    fusos.remove(fuso)
+                                    scope.launch {
+                                        withContext(Dispatchers.IO) {
+                                            fusoDao.excluir(fuso)
+                                        }
+                                        fusos.remove(fuso)
+                                    }
                                 }
                             ) {
 

@@ -33,6 +33,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private val Fundo = Color(0xFF0B0E17)
 private val Roxo = Color(0xFF9B7CFF)
@@ -46,51 +51,43 @@ fun DetalheAlarmeScreen(
     alarmes: SnapshotStateList<Alarme>,
     onVoltar: () -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val database = remember { AppDatabase.getDatabase(context) }
+    val alarmeDao = remember { database.alarmeDao() }
+    val scope = rememberCoroutineScope()
 
-    val alarme = alarmes.find {
-        it.id == id
+    var alarme by remember(id) {
+        mutableStateOf<Alarme?>(null)
+    }
+
+    LaunchedEffect(id) {
+        alarme = withContext(Dispatchers.IO) {
+            alarmeDao.buscarPorId(id)
+        }
     }
 
     if (alarme == null) {
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .fillMaxHeight()
-                .background(Fundo)
-                .padding(20.dp)
-        ) {
-
-            Text(
-                text = "Alarme não encontrado",
-                color = Texto
-            )
-
-            Button(
-                onClick = onVoltar
-            ) {
-                Text("Voltar")
-            }
-        }
-
+        // Aguarda o carregamento do banco de dados.
+        // Se o ID não existir, o alarme continuará nulo.
         return
     }
 
-    var horario by remember {
-        mutableStateOf(alarme.horario)
+    val alarmeAtual = alarme ?: return
+
+    var horario by remember(id) {
+        mutableStateOf(alarmeAtual.horario)
+    }
+    var nome by remember(id) {
+        mutableStateOf(alarmeAtual.nome)
+    }
+    var dias by remember(id) {
+        mutableStateOf(alarmeAtual.dias)
+    }
+    var ativo by remember(id) {
+        mutableStateOf(alarmeAtual.ativo)
     }
 
-    var nome by remember {
-        mutableStateOf(alarme.nome)
-    }
-
-    var dias by remember {
-        mutableStateOf(alarme.dias)
-    }
-
-    var ativo by remember {
-        mutableStateOf(alarme.ativo)
-    }
+    // Mantenha aqui o Scaffold e o restante do layout que você já tem.
 
     Scaffold(
         containerColor = Fundo,
@@ -245,22 +242,26 @@ fun DetalheAlarmeScreen(
 
             Button(
                 onClick = {
+                    val alarmeAtualizado = alarmeAtual.copy(
+                        horario = horario,
+                        nome = nome,
+                        dias = dias,
+                        ativo = ativo
+                    )
 
-                    val indice = alarmes.indexOfFirst {
-                        it.id == id
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            alarmeDao.atualizar(alarmeAtualizado)
+                        }
+
+                        val indice = alarmes.indexOfFirst { it.id == id }
+                        if (indice >= 0) {
+                            alarmes[indice] = alarmeAtualizado
+                        }
+
+                        alarme = alarmeAtualizado
+                        onVoltar()
                     }
-
-                    if (indice >= 0) {
-
-                        alarmes[indice] = alarme.copy(
-                            horario = horario,
-                            nome = nome,
-                            dias = dias,
-                            ativo = ativo
-                        )
-                    }
-
-                    onVoltar()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
