@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.MaterialTheme
+import com.example.tungclock.ui.theme.TunTunClockTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MaterialTheme {
+            TunTunClockTheme {
                 AppNavigation()
             }
         }
