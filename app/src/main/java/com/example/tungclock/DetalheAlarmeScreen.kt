@@ -4,16 +4,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -22,29 +25,59 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private val Fundo = Color(0xFF17120F)
-private val Roxo = Color(0xFFC58B55)
-private val Texto = Color.White
-private val TextoSecundario = Color(0xFFBCA18A)
+private val FundoDetalheAlarme = Color(0xFF17120F)
+private val MadeiraDetalheAlarme = Color(0xFFC58B55)
+private val MadeiraClaraDetalheAlarme = Color(0xFFE0B17A)
+private val TextoDetalheAlarme = Color(0xFFF6EBDD)
+private val TextoSecundarioDetalheAlarme = Color(0xFFBCA18A)
+private val CardDetalheAlarme = Color(0xFF261D17)
+private val BordaDetalheAlarme = Color(0xFF493427)
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val diasDaSemana = listOf("Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo")
+
+private fun diasSelecionadosDoTexto(texto: String): Set<String> {
+    val valor = texto.lowercase()
+    if (valor.contains("todos os dias")) return diasDaSemana.toSet()
+    if (valor.contains("segunda a sexta")) return diasDaSemana.take(5).toSet()
+    return diasDaSemana.filter { dia ->
+        valor.contains(dia.lowercase()) ||
+            (dia == "Segunda" && valor.contains("seg")) ||
+            (dia == "Terça" && valor.contains("ter")) ||
+            (dia == "Quarta" && valor.contains("qua")) ||
+            (dia == "Quinta" && valor.contains("qui")) ||
+            (dia == "Sábado" && valor.contains("sáb")) ||
+            (dia == "Domingo" && valor.contains("dom"))
+    }.toSet()
+}
+
+private fun textoDosDiasSelecionados(selecionados: Set<String>): String {
+    if (selecionados.isEmpty()) return "Uma vez"
+    if (selecionados.size == 7) return "Todos os dias"
+    if (selecionados == diasDaSemana.take(5).toSet()) return "Segunda a sexta"
+    return diasDaSemana.filter { it in selecionados }.joinToString(", ")
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun DetalheAlarmeScreen(
     id: Int,
@@ -56,228 +89,215 @@ fun DetalheAlarmeScreen(
     val alarmeDao = remember { database.alarmeDao() }
     val scope = rememberCoroutineScope()
 
-    var alarme by remember(id) {
-        mutableStateOf<Alarme?>(null)
-    }
-
+    var alarme by remember(id) { mutableStateOf<Alarme?>(null) }
+    var carregou by remember(id) { mutableStateOf(false) }
     LaunchedEffect(id) {
-        alarme = withContext(Dispatchers.IO) {
-            alarmeDao.buscarPorId(id)
-        }
+        alarme = withContext(Dispatchers.IO) { alarmeDao.buscarPorId(id) }
+        carregou = true
     }
 
-    if (alarme == null) {
-        // Aguarda o carregamento do banco de dados.
-        // Se o ID não existir, o alarme continuará nulo.
+    if (!carregou || alarme == null) {
+        Scaffold(
+            containerColor = FundoDetalheAlarme,
+            topBar = {
+                TopAppBar(
+                    title = { Text("Detalhes do alarme") },
+                    navigationIcon = {
+                        IconButton(onClick = onVoltar) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = FundoDetalheAlarme,
+                        titleContentColor = TextoDetalheAlarme,
+                        navigationIconContentColor = TextoDetalheAlarme
+                    )
+                )
+            }
+        ) { padding ->
+            Column(
+                Modifier.fillMaxSize().padding(padding).padding(24.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    if (carregou) "Não foi possível encontrar este alarme." else "Carregando alarme…",
+                    color = TextoDetalheAlarme
+                )
+            }
+        }
         return
     }
 
-    val alarmeAtual = alarme ?: return
-
-    var horario by remember(id) {
-        mutableStateOf(alarmeAtual.horario)
-    }
-    var nome by remember(id) {
-        mutableStateOf(alarmeAtual.nome)
-    }
-    var dias by remember(id) {
-        mutableStateOf(alarmeAtual.dias)
-    }
-    var ativo by remember(id) {
-        mutableStateOf(alarmeAtual.ativo)
-    }
-
-    // Mantenha aqui o Scaffold e o restante do layout que você já tem.
+    val alarmeAtual = alarme!!
+    var horario by remember(id) { mutableStateOf(alarmeAtual.horario) }
+    var nome by remember(id) { mutableStateOf(alarmeAtual.nome) }
+    var diasSelecionados by remember(id) { mutableStateOf(diasSelecionadosDoTexto(alarmeAtual.dias)) }
+    var ativo by remember(id) { mutableStateOf(alarmeAtual.ativo) }
+    var erro by remember(id) { mutableStateOf("") }
 
     Scaffold(
-        containerColor = Fundo,
+        containerColor = FundoDetalheAlarme,
         topBar = {
             TopAppBar(
-                title = {
-                    Text("Detalhes do Alarme")
-                },
+                title = { Text("Detalhes do alarme", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onVoltar
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Voltar"
-                        )
+                    IconButton(onClick = onVoltar) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Fundo,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = FundoDetalheAlarme,
+                    titleContentColor = TextoDetalheAlarme,
+                    navigationIconContentColor = TextoDetalheAlarme
                 )
             )
         }
     ) { innerPadding ->
-
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Fundo)
-                .padding(innerPadding)
-                .padding(20.dp),
+            modifier = Modifier.fillMaxSize().background(FundoDetalheAlarme)
+                .padding(innerPadding).padding(horizontal = 20.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.Top
         ) {
-
-            Text(
-                text = "EDITANDO ALARME",
-                color = Roxo,
-                fontSize = 12.sp
-            )
-
-            Spacer(
-                modifier = Modifier.height(20.dp)
-            )
+            Text("EDITANDO ALARME", color = MadeiraClaraDetalheAlarme, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
+            Spacer(Modifier.height(18.dp))
 
             OutlinedTextField(
                 value = horario,
-                onValueChange = {
-                    horario = it
+                onValueChange = { entrada ->
+                    val digitos = entrada.filter { it.isDigit() }.take(4)
+                    horario = if (digitos.length <= 2) digitos else digitos.substring(0, 2) + ":" + digitos.substring(2)
+                    erro = ""
                 },
                 modifier = Modifier.fillMaxWidth(),
-                label = {
-                    Text("Horário")
-                },
+                label = { Text("Horário (HH:mm)") },
+                placeholder = { Text("07:30") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White,
-                    cursorColor = Color.White,
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.White
-                ),
+                    focusedTextColor = TextoDetalheAlarme,
+                    unfocusedTextColor = TextoDetalheAlarme,
+                    focusedLabelColor = MadeiraClaraDetalheAlarme,
+                    unfocusedLabelColor = TextoSecundarioDetalheAlarme,
+                    cursorColor = MadeiraClaraDetalheAlarme,
+                    focusedBorderColor = MadeiraDetalheAlarme,
+                    unfocusedBorderColor = BordaDetalheAlarme
+                )
             )
-
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
+            Spacer(Modifier.height(12.dp))
 
             OutlinedTextField(
                 value = nome,
-                onValueChange = {
-                    nome = it
-                },
+                onValueChange = { nome = it; erro = "" },
                 modifier = Modifier.fillMaxWidth(),
-                label = {
-                    Text("Nome")
-                },
+                label = { Text("Nome do alarme") },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White,
-                    cursorColor = Color.White,
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.White
-                ),
+                    focusedTextColor = TextoDetalheAlarme,
+                    unfocusedTextColor = TextoDetalheAlarme,
+                    focusedLabelColor = MadeiraClaraDetalheAlarme,
+                    unfocusedLabelColor = TextoSecundarioDetalheAlarme,
+                    cursorColor = MadeiraClaraDetalheAlarme,
+                    focusedBorderColor = MadeiraDetalheAlarme,
+                    unfocusedBorderColor = BordaDetalheAlarme
+                )
             )
+            Spacer(Modifier.height(20.dp))
 
-            Spacer(
-                modifier = Modifier.height(12.dp)
+            Text("Repetir", color = TextoDetalheAlarme, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+            Spacer(Modifier.height(5.dp))
+            Text(
+                if (diasSelecionados.isEmpty()) "Não repetir" else "Selecione os dias desejados",
+                color = TextoSecundarioDetalheAlarme,
+                fontSize = 12.sp
             )
+            Spacer(Modifier.height(10.dp))
 
-            OutlinedTextField(
-                value = dias,
-                onValueChange = {
-                    dias = it
-                },
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                diasDaSemana.chunked(4).forEach { linha ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(7.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        linha.forEach { dia ->
+                            val selecionado = dia in diasSelecionados
+                            FilterChip(
+                                selected = selecionado,
+                                onClick = {
+                                    diasSelecionados = if (selecionado) diasSelecionados - dia else diasSelecionados + dia
+                                    erro = ""
+                                },
+                                label = { Text(dia.take(3), fontSize = 12.sp) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MadeiraDetalheAlarme,
+                                    selectedLabelColor = FundoDetalheAlarme,
+                                    containerColor = CardDetalheAlarme,
+                                    labelColor = TextoDetalheAlarme
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                label = {
-                    Text("Dias")
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White,
-                    cursorColor = Color.White,
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.White
-                ),
-            )
-
-            Spacer(
-                modifier = Modifier.height(20.dp)
-            )
-
-            androidx.compose.foundation.layout.Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-
-                Column {
-
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Alarme ativo", color = TextoDetalheAlarme, fontWeight = FontWeight.SemiBold)
                     Text(
-                        text = "Alarme ativo",
-                        color = Texto
-                    )
-
-                    Text(
-                        text = if (ativo)
-                            "O alarme está ligado"
-                        else
-                            "O alarme está desligado",
-                        color = TextoSecundario,
+                        if (ativo) "O alarme está ligado" else "O alarme está desligado",
+                        color = TextoSecundarioDetalheAlarme,
                         fontSize = 12.sp
                     )
                 }
-
-                Switch(
-                    checked = ativo,
-                    onCheckedChange = {
-                        ativo = it
-                    }
-                )
+                Switch(checked = ativo, onCheckedChange = { ativo = it })
             }
 
-            Spacer(
-                modifier = Modifier.height(25.dp)
-            )
+            if (erro.isNotBlank()) {
+                Spacer(Modifier.height(12.dp))
+                Text(erro, color = Color(0xFFE18A75), fontSize = 12.sp)
+            }
 
+            Spacer(Modifier.height(22.dp))
             Button(
                 onClick = {
-                    val alarmeAtualizado = alarmeAtual.copy(
-                        horario = horario,
-                        nome = nome,
-                        dias = dias,
-                        ativo = ativo
-                    )
-
-                    scope.launch {
-                        withContext(Dispatchers.IO) {
-                            alarmeDao.atualizar(alarmeAtualizado)
+                    val horarioValido = horario.matches(Regex("^([01][0-9]|2[0-3]):[0-5][0-9]$"))
+                    if (!horarioValido) {
+                        erro = "Digite um horário válido entre 00:00 e 23:59."
+                    } else if (nome.isBlank()) {
+                        erro = "Digite um nome para o alarme."
+                    } else {
+                        val atualizado = alarmeAtual.copy(
+                            horario = horario,
+                            nome = nome.trim(),
+                            dias = textoDosDiasSelecionados(diasSelecionados),
+                            ativo = ativo
+                        )
+                        scope.launch {
+                            withContext(Dispatchers.IO) { alarmeDao.atualizar(atualizado) }
+                            val indice = alarmes.indexOfFirst { it.id == id }
+                            if (indice >= 0) alarmes[indice] = atualizado
+                            alarme = atualizado
+                            onVoltar()
                         }
-
-                        val indice = alarmes.indexOfFirst { it.id == id }
-                        if (indice >= 0) {
-                            alarmes[indice] = alarmeAtualizado
-                        }
-
-                        alarme = alarmeAtualizado
-                        onVoltar()
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp)
             ) {
-
-                Text(
-                    text = "SALVAR ALTERAÇÕES"
-                )
+                Text("SALVAR ALTERAÇÕES", fontWeight = FontWeight.Bold)
             }
-
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
-
+            Spacer(Modifier.height(10.dp))
             Text(
-                text = "Esta tela permite editar os dados do item selecionado.",
-                color = TextoSecundario,
+                "Você pode selecionar mais de um dia. Sem dias selecionados, o alarme fica configurado para uma única vez.",
+                color = TextoSecundarioDetalheAlarme,
                 fontSize = 11.sp
             )
         }
