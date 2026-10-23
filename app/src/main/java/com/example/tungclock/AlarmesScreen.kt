@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -92,7 +91,7 @@ fun AlarmesScreen(
                     }
                 },
                 navigationIcon = {
-                    Icon(Icons.Default.Alarm, contentDescription = null, tint = MadeiraClara, modifier = Modifier.padding(start = 16.dp, end = 10.dp))
+                    Text("◷", modifier = Modifier.padding(start = 16.dp, end = 10.dp), color = MadeiraClara, fontSize = 24.sp)
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Fundo, titleContentColor = Texto)
             )
@@ -131,7 +130,7 @@ fun AlarmesScreen(
                     border = BorderStroke(1.dp, Borda)
                 ) {
                     Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Icon(Icons.Default.Alarm, contentDescription = null, tint = MadeiraClara, modifier = Modifier.height(36.dp))
+                        Text("◷", color = MadeiraClara, fontSize = 36.sp)
                         Text("Nenhum alarme por enquanto", color = Texto, fontWeight = FontWeight.SemiBold)
                         Text("Use o botão + para criar seu primeiro horário.", color = TextoSecundario, fontSize = 13.sp)
                     }
