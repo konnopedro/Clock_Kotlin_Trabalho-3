@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -134,7 +133,7 @@ fun FusosScreen(
             if (fusos.isEmpty()) {
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = CardFundo), border = BorderStroke(1.dp, Borda)) {
                     Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Icon(Icons.Default.Public, contentDescription = null, tint = MadeiraClara)
+                        Text("◎", color = MadeiraClara, fontSize = 28.sp)
                         Text("Nenhuma cidade adicionada", color = Texto, fontWeight = FontWeight.SemiBold)
                         Text("Escolha uma cidade para começar sua lista de relógios mundiais.", color = TextoSecundario, fontSize = 13.sp)
                         TextButton(onClick = { mostrarCidades = true }) { Text("Escolher cidade", color = MadeiraClara) }
@@ -161,7 +160,7 @@ fun FusosScreen(
                             border = BorderStroke(1.dp, Borda)
                         ) {
                             Row(Modifier.fillMaxWidth().padding(start = 17.dp, top = 16.dp, bottom = 16.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Public, contentDescription = null, tint = MadeiraClara, modifier = Modifier.padding(end = 13.dp))
+                                Text("◎", modifier = Modifier.padding(end = 13.dp), color = MadeiraClara, fontSize = 22.sp)
                                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                     Text(fuso.cidade, color = Texto, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
                                     Text(fuso.pais, color = TextoSecundario, fontSize = 12.sp)
