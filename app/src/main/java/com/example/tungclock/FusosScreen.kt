@@ -46,9 +46,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-private val Fundo = Color(0xFF0B0E17)
-private val CardFundo = Color(0xFF171D2B)
-private val Roxo = Color(0xFF9B7CFF)
+private val Fundo = Color(0xFF17120F)
+private val CardFundo = Color(0xFF261D17)
+private val Roxo = Color(0xFFC58B55)
 private val Texto = Color.White
 private val TextoSecundario = Color.White
 
