@@ -38,6 +38,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private val Fundo = Color(0xFF0B0E17)
 private val CardFundo = Color(0xFF171D2B)
@@ -67,6 +71,11 @@ fun AlarmesScreen(
     var novosDias by remember {
         mutableStateOf("")
     }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val database = remember { AppDatabase.getDatabase(context) }
+    val alarmeDao = remember { database.alarmeDao() }
+    val scope = rememberCoroutineScope()
 
 
     Scaffold(
@@ -258,27 +267,22 @@ fun AlarmesScreen(
             Button(
 
                 onClick = {
-
-                    if (
-                        novoHorario.isNotBlank() &&
-                        novoNome.isNotBlank()
-                    ) {
-
-                        val novoId =
-                            (alarmes.maxOfOrNull { it.id } ?: 0) + 1
-
-                        alarmes.add(
-
-                            Alarme(
-                                id = novoId,
-                                horario = novoHorario,
-                                nome = novoNome,
-                                dias = novosDias.ifBlank {
-                                    "Todos os dias"
-                                },
-                                ativo = true
-                            )
+                    if (novoHorario.isNotBlank() && novoNome.isNotBlank()) {
+                        val novoAlarme = Alarme(
+                            horario = novoHorario,
+                            nome = novoNome,
+                            dias = novosDias.ifBlank { "Todos os dias" },
+                            ativo = true
                         )
+
+                        scope.launch {
+                            val alarmeSalvo = withContext(Dispatchers.IO) {
+                                val id = alarmeDao.inserir(novoAlarme)
+                                alarmeDao.buscarPorId(id.toInt())
+                            }
+
+                            alarmeSalvo?.let { alarmes.add(it) }
+                        }
 
                         novoHorario = ""
                         novoNome = ""
@@ -442,11 +446,13 @@ fun AlarmesScreen(
                             IconButton(
 
                                 onClick = {
-
-                                    alarmes.remove(
-                                        alarme
-                                    )
-                                }
+                                    scope.launch {
+                                        withContext(Dispatchers.IO) {
+                                            alarmeDao.excluir(alarme)
+                                        }
+                                        alarmes.remove(alarme)
+                                    }
+                                },
 
                             ) {
 

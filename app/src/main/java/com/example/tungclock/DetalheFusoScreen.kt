@@ -38,6 +38,9 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 private val Fundo = Color(0xFF0B0E17)
@@ -56,49 +59,54 @@ fun DetalheFusoScreen(
     onVoltar: () -> Unit
 ) {
 
-    val fuso = fusos.find {
-        it.id == id
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val database = remember { AppDatabase.getDatabase(context) }
+    val fusoDao = remember { database.fusoHorarioDao() }
+
+    var fuso by remember(id) {
+        mutableStateOf<FusoHorario?>(null)
+    }
+
+    LaunchedEffect(id) {
+        fuso = withContext(Dispatchers.IO) {
+            fusoDao.buscarPorId(id)
+        }
     }
 
     if (fuso == null) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .fillMaxHeight()
                 .background(Fundo)
                 .padding(20.dp)
         ) {
-
             Text(
-                text = "Fuso não encontrado",
+                text = "Carregando fuso horário...",
                 color = Texto
             )
-
-            Button(
-                onClick = onVoltar
-            ) {
+            Button(onClick = onVoltar) {
                 Text("Voltar")
             }
         }
-
         return
     }
+
+    val fusoAtual = fuso ?: return
 
     var agora by remember {
         mutableStateOf(
             ZonedDateTime.now(
-                ZoneId.of(fuso.zona)
+                ZoneId.of(fusoAtual.zona)
             )
         )
     }
 
-    LaunchedEffect(fuso.zona) {
+    LaunchedEffect(fusoAtual.zona) {
 
         while (true) {
 
             agora = ZonedDateTime.now(
-                ZoneId.of(fuso.zona)
+                ZoneId.of(fusoAtual.zona)
             )
 
             delay(1000)
@@ -114,7 +122,7 @@ fun DetalheFusoScreen(
     )
 
     val diferenca =
-        fuso.offset - (-3)
+        fusoAtual.offset - (-3)
 
     val textoDiferenca = when {
 
@@ -166,7 +174,7 @@ fun DetalheFusoScreen(
         ) {
 
             Text(
-                text = fuso.cidade.uppercase(),
+                text = fusoAtual.cidade.uppercase(),
                 color = Roxo,
                 fontSize = 14.sp
             )
@@ -176,7 +184,7 @@ fun DetalheFusoScreen(
             )
 
             Text(
-                text = fuso.pais,
+                text = fusoAtual.pais,
                 color = TextoSecundario,
                 fontSize = 13.sp
             )
@@ -207,9 +215,9 @@ fun DetalheFusoScreen(
 
             Text(
                 text = "UTC ${
-                    if (fuso.offset >= 0) "+"
+                    if (fusoAtual.offset >= 0) "+"
                     else ""
-                }${fuso.offset}",
+                }${fusoAtual.offset}",
                 color = Azul,
                 fontSize = 13.sp
             )
@@ -263,7 +271,7 @@ fun DetalheFusoScreen(
                         Column {
 
                             Text(
-                                text = fuso.cidade,
+                                text = fusoAtual.cidade,
                                 color = Texto,
                                 fontSize = 13.sp
                             )

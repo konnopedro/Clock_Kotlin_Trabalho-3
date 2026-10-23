@@ -25,6 +25,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private val Fundo = Color(0xFF0B0E17)
 private val Divisoria = Color(0xFF303748)
@@ -55,52 +60,77 @@ fun AppNavigation() {
 
     val rotaAtual = navBackStackEntry?.destination?.route
 
-    // Lista de alarmes
-    val alarmes = remember {
-        mutableStateListOf(
-            Alarme(
-                id = 1,
-                horario = "07:00",
-                nome = "Acordar",
-                dias = "Segunda a sexta",
-                ativo = true
-            ),
-            Alarme(
-                id = 2,
-                horario = "12:00",
-                nome = "Almoço",
-                dias = "Todos os dias",
-                ativo = false
+
+    val context = LocalContext.current
+    val database = remember { AppDatabase.getDatabase(context) }
+
+    val alarmes = remember { mutableStateListOf<Alarme>() }
+    val fusos = remember { mutableStateListOf<FusoHorario>() }
+
+    LaunchedEffect(Unit) {
+        val (alarmesSalvos, fusosSalvos) = withContext(Dispatchers.IO) {
+            val alarmeDao = database.alarmeDao()
+            val fusoDao = database.fusoHorarioDao()
+
+            if (alarmeDao.buscarTodos().isEmpty()) {
+                alarmeDao.inserir(
+                    Alarme(
+                        horario = "07:00",
+                        nome = "Acordar",
+                        dias = "Segunda a sexta",
+                        ativo = true
+                    )
+                )
+                alarmeDao.inserir(
+                    Alarme(
+                        horario = "12:00",
+                        nome = "Almoço",
+                        dias = "Todos os dias",
+                        ativo = false
+                    )
+                )
+            }
+
+            if (fusoDao.buscarTodos().isEmpty()) {
+                fusoDao.inserir(
+                    FusoHorario(
+                        cidade = "São Paulo",
+                        pais = "Brasil",
+                        zona = "America/Sao_Paulo",
+                        offset = -3
+                    )
+                )
+                fusoDao.inserir(
+                    FusoHorario(
+                        cidade = "New York",
+                        pais = "Estados Unidos",
+                        zona = "America/New_York",
+                        offset = -4
+                    )
+                )
+                fusoDao.inserir(
+                    FusoHorario(
+                        cidade = "Londres",
+                        pais = "Reino Unido",
+                        zona = "Europe/London",
+                        offset = 1
+                    )
+                )
+            }
+
+            Pair(
+                alarmeDao.buscarTodos(),
+                fusoDao.buscarTodos()
             )
-        )
+        }
+
+        alarmes.clear()
+        alarmes.addAll(alarmesSalvos)
+
+        fusos.clear()
+        fusos.addAll(fusosSalvos)
     }
 
-    // Lista de fusos horários
-    val fusos = remember {
-        mutableStateListOf(
-            FusoHorario(
-                id = 1,
-                cidade = "São Paulo",
-                pais = "Brasil",
-                zona = "America/Sao_Paulo",
-                offset = -3
-            ),
-            FusoHorario(
-                id = 2,
-                cidade = "New York",
-                pais = "Estados Unidos",
-                zona = "America/New_York",
-                offset = -4
-            ),
-            FusoHorario(
-                id = 3,
-                cidade = "Londres",
-                pais = "Reino Unido",
-                zona = "Europe/London",
-                offset = 1
-            )
-        )
-    }
 
     Scaffold(
         containerColor = Fundo,
