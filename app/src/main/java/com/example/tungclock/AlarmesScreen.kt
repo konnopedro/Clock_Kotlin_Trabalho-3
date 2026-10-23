@@ -244,17 +244,17 @@ fun AlarmesScreen(
                 Button(
                     onClick = {
                         val partes = novoHorario.trim().split(":")
+                        val horaInformada = partes.getOrNull(0)?.toIntOrNull()
+                        val minutoInformado = partes.getOrNull(1)?.toIntOrNull()
                         val horarioValido = partes.size == 2 &&
-                            partes[0].toIntOrNull() in 0..23 &&
-                            partes[1].toIntOrNull() in 0..59
+                            horaInformada != null && horaInformada in 0..23 &&
+                            minutoInformado != null && minutoInformado in 0..59
                         if (!horarioValido) {
                             erro = "Use um horário válido, por exemplo 07:30."
                         } else if (novoNome.isBlank()) {
                             erro = "Digite um nome para o alarme."
                         } else {
-                            val horarioNormalizado = partes.joinToString(":") {
-                                it.toInt().toString().padStart(2, '0')
-                            }
+                            val horarioNormalizado = "${horaInformada.toString().padStart(2, '0')}:${minutoInformado.toString().padStart(2, '0')}"
                             val novoAlarme = Alarme(
                                 horario = horarioNormalizado,
                                 nome = novoNome.trim(),
