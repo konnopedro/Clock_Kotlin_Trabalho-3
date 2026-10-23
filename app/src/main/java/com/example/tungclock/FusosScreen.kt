@@ -104,33 +104,32 @@ fun FusosScreen(
     Scaffold(
         modifier = Modifier.padding(paddingValues),
         containerColor = Fundo,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text("Relógios mundiais", color = Texto, fontWeight = FontWeight.Bold)
-                        Text(fusos.size.toString() + " cidades salvas", color = TextoSecundario, fontSize = 12.sp)
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onVoltar) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Texto)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { mostrarCidades = true; erro = "" }) {
-                        Icon(Icons.Default.Add, contentDescription = "Adicionar cidade", tint = MadeiraClara)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Fundo, titleContentColor = Texto)
-            )
-        }
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().background(Fundo).padding(innerPadding).padding(start = 18.dp, top = 22.dp, end = 18.dp, bottom = 12.dp),
+            modifier = Modifier.fillMaxSize().background(Fundo).padding(innerPadding).padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("TUN TUN CLOCK · FUSOS", color = Madeira, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(14.dp))
+                Text("Relógios mundiais", color = Color.White, fontSize = 20.sp)
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(onClick = onVoltar) {
+                    Text("← Voltar", color = TextoSecundario)
+                }
+                TextButton(onClick = { mostrarCidades = true; erro = "" }) {
+                    Icon(Icons.Default.Add, contentDescription = null, tint = MadeiraClara)
+                    Text("Adicionar cidade", color = MadeiraClara)
+                }
+            }
+
             Text("Acompanhe o horário em qualquer lugar do mundo.", color = TextoSecundario, fontSize = 13.sp)
             if (fusos.isEmpty()) {
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = CardFundo), border = BorderStroke(1.dp, Borda)) {

@@ -108,20 +108,6 @@ fun AlarmesScreen(
         modifier = Modifier.padding(paddingValues),
         containerColor = Fundo,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text("Alarmes", color = Texto, fontWeight = FontWeight.Bold)
-                        Text(alarmes.count { it.ativo }.toString() + " alarmes ativos", color = TextoSecundario, fontSize = 12.sp)
-                    }
-                },
-                navigationIcon = {
-                    Text("◷", modifier = Modifier.padding(start = 16.dp, end = 10.dp), color = MadeiraClara, fontSize = 24.sp)
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Fundo, titleContentColor = Texto)
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -140,9 +126,17 @@ fun AlarmesScreen(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().background(Fundo).padding(innerPadding).padding(start = 18.dp, top = 22.dp, end = 18.dp, bottom = 12.dp),
+            modifier = Modifier.fillMaxSize().background(Fundo).padding(innerPadding).padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("TUN TUN CLOCK · ALARMES", color = Madeira, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(14.dp))
+                Text("Alarmes", color = Color.White, fontSize = 20.sp)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("Sua rotina", color = Texto, fontSize = 25.sp, fontWeight = FontWeight.Bold)
                 Text("Toque em um alarme para editar os detalhes.", color = TextoSecundario, fontSize = 13.sp)
