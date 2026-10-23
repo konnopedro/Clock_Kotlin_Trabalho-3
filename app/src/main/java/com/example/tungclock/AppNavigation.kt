@@ -193,13 +193,13 @@ fun AppNavigation() {
                         },
                         icon = {
                             Text(
-                                text = "⏱",
+                                text = "◴",
                                 color = if (rotaAtual == Rotas.CRONOMETRO)
                                     Roxo else TextoBranco
                             )
                         },
                         label = {
-                            Text("Crono")
+                            Text("Cronômetro")
                         },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Roxo,
@@ -220,7 +220,7 @@ fun AppNavigation() {
                         },
                         icon = {
                             Text(
-                                text = "⏰",
+                                text = "◷",
                                 color = if (rotaAtual == Rotas.TIMER)
                                     Roxo else TextoBranco
                             )
