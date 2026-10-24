@@ -158,16 +158,5 @@ fun RelogioScreen(
                 }
             }
         }
-
-        Card(onClick = onAbrirAlarmes, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF38271D)), border = BorderStroke(1.dp, Color(0xFF704B32))) {
-            Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                Text("◉", color = MadeiraClara, fontSize = 27.sp)
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Seus alarmes", color = Texto, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-                    Text("Crie horários para sua rotina", color = TextoSecundario, fontSize = 12.sp)
-                }
-                Text("›", color = MadeiraClara, fontSize = 25.sp)
-            }
-        }
     }
 }
