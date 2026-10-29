@@ -30,6 +30,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.saveable.rememberSaveable
 
 private val Fundo = Color(0xFF17120F)
 private val CardFundo = Color(0xFF261D17)
@@ -44,15 +47,15 @@ fun TimerScreen(
 
     val context = LocalContext.current
 
-    var minutos by remember {
+    var minutos by rememberSaveable {
         mutableStateOf("15")
     }
 
-    var segundos by remember {
+    var segundos by rememberSaveable {
         mutableStateOf(0)
     }
 
-    var rodando by remember {
+    var rodando by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -95,6 +98,7 @@ fun TimerScreen(
             .fillMaxSize()
             .background(Fundo)
             .padding(paddingValues)
+            .verticalScroll(rememberScrollState())
             .padding(20.dp),
 
         horizontalAlignment = Alignment.CenterHorizontally

@@ -26,6 +26,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.saveable.rememberSaveable
 
 private val Fundo = Color(0xFF17120F)
 private val CardFundo = Color(0xFF261D17)
@@ -38,11 +41,11 @@ fun CronometroScreen(
     paddingValues: PaddingValues
 ) {
 
-    var segundos by remember {
+    var segundos by rememberSaveable {
         mutableStateOf(0)
     }
 
-    var rodando by remember {
+    var rodando by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -61,6 +64,7 @@ fun CronometroScreen(
             .fillMaxSize()
             .background(Fundo)
             .padding(paddingValues)
+            .verticalScroll(rememberScrollState())
             .padding(20.dp),
 
         horizontalAlignment = Alignment.CenterHorizontally

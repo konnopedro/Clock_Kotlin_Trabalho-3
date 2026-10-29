@@ -125,42 +125,96 @@ fun AlarmesScreen(
             }
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier.fillMaxSize().background(Fundo).padding(innerPadding).padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 12.dp),
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Fundo)
+                .padding(innerPadding)
+                .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(
+                top = 20.dp,
+                bottom = 100.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("TUN TUN CLOCK · ALARMES", color = Madeira, fontSize = 14.sp)
-                Spacer(modifier = Modifier.height(14.dp))
-                Text("Alarmes", color = Color.White, fontSize = 20.sp)
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "TUN TUN CLOCK · ALARMES",
+                        color = Madeira,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Text(
+                        "Alarmes",
+                        color = Color.White,
+                        fontSize = 20.sp
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
 
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Sua rotina", color = Texto, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-                Text("Toque em um alarme para editar os detalhes.", color = TextoSecundario, fontSize = 13.sp)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        "Sua rotina",
+                        color = Texto,
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        "Toque em um alarme para editar os detalhes.",
+                        color = TextoSecundario,
+                        fontSize = 13.sp
+                    )
+                }
             }
 
             if (alarmes.isEmpty()) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardFundo),
-                    border = BorderStroke(1.dp, Borda)
-                ) {
-                    Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text("◷", color = MadeiraClara, fontSize = 36.sp)
-                        Text("Nenhum alarme por enquanto", color = Texto, fontWeight = FontWeight.SemiBold)
-                        Text("Use o botão + para criar seu primeiro horário.", color = TextoSecundario, fontSize = 13.sp)
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = CardFundo
+                        ),
+                        border = BorderStroke(1.dp, Borda)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(22.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Text(
+                                "◷",
+                                color = MadeiraClara,
+                                fontSize = 36.sp
+                            )
+                            Text(
+                                "Nenhum alarme por enquanto",
+                                color = Texto,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                "Use o botão + para criar seu primeiro horário.",
+                                color = TextoSecundario,
+                                fontSize = 13.sp
+                            )
+                        }
                     }
                 }
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 90.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+
+
+
                     items(items = alarmes, key = { it.id }) { alarme ->
                         Card(
                             modifier = Modifier.fillMaxWidth().clickable { onAbrirDetalhes(alarme.id) },
@@ -200,7 +254,7 @@ fun AlarmesScreen(
                 }
             }
         }
-    }
+
 
     if (mostrarNovoAlarme) {
         AlertDialog(
@@ -287,7 +341,12 @@ fun AlarmesScreen(
             onDismissRequest = { alarmeParaExcluir = null },
             containerColor = CardFundo,
             title = { Text("Excluir alarme?", color = Texto) },
-            text = { Text("O alarme “" + alarme.nome + "” será removido permanentemente.", color = TextoSecundario) },
+            text = {
+                Text(
+                    "O alarme “" + alarme.nome + "” será removido permanentemente.",
+                    color = TextoSecundario
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch {
@@ -298,7 +357,12 @@ fun AlarmesScreen(
                 }) { Text("Excluir", color = Color(0xFFE18A75)) }
             },
             dismissButton = {
-                TextButton(onClick = { alarmeParaExcluir = null }) { Text("Cancelar", color = TextoSecundario) }
+                TextButton(onClick = { alarmeParaExcluir = null }) {
+                    Text(
+                        "Cancelar",
+                        color = TextoSecundario
+                    )
+                }
             }
         )
     }
