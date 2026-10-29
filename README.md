@@ -69,46 +69,6 @@ Os DAOs disponibilizam operações para inserir, listar, buscar por ID, atualiza
 3. Aguarde a sincronização do Gradle.
 4. Execute o aplicativo em um emulador ou dispositivo Android.
 
-## Evidências do projeto
-
-Adicione as capturas de tela ou gravações nos espaços abaixo. As evidências devem ser produzidas com o aplicativo executando e mostrar as funcionalidades descritas.
-
-### 1. Tela principal
-
-**O que colocar:** captura da navegação inferior mostrando as áreas Relógio, Cronômetro e Timer.
-
-<!-- Adicionar aqui a imagem da tela principal. -->
-
-### 2. Alarmes e edição
-
-**O que colocar:** captura da lista de alarmes e da tela de detalhes durante a edição de um alarme. Se possível, mostre um alarme cadastrado por você.
-
-<!-- Adicionar aqui as imagens da lista e da edição de alarmes. -->
-
-### 3. Fusos horários
-
-**O que colocar:** captura da lista de fusos cadastrados e da tela de detalhes mostrando o horário da localidade e a comparação com São Paulo.
-
-<!-- Adicionar aqui as imagens da lista e dos detalhes de fusos horários. -->
-
-### 4. Persistência após fechar e abrir o aplicativo
-
-**O que colocar:** primeiro, uma captura mostrando um alarme e um fuso cadastrados ou um alarme editado. Depois, feche completamente o aplicativo, abra-o novamente e adicione uma segunda captura mostrando que os dados continuam salvos.
-
-<!-- Adicionar aqui as capturas antes e depois de reabrir o aplicativo. -->
-
-### 5. Exclusão persistente
-
-**O que colocar:** capture a lista após excluir um alarme ou fuso e, depois de fechar e reabrir o aplicativo, mostre que o item excluído não reapareceu.
-
-<!-- Adicionar aqui as capturas que demonstram a exclusão antes e depois de reabrir o aplicativo. -->
-
-### 6. Vídeo de demonstração (opcional)
-
-**O que colocar:** link de uma gravação curta demonstrando cadastro, edição, exclusão e persistência após reiniciar o aplicativo.
-
-<!-- Adicionar aqui o link do vídeo, se houver. -->
-
 ## Disciplina
 
 **Desenvolvimento de Aplicativos Móveis — Trabalho 3**
