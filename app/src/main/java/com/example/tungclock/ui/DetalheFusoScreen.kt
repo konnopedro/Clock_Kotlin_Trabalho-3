@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -84,6 +85,11 @@ fun DetalheFusoScreen(
     }
 
     val fusoAtual = fuso ?: return
+
+    var editando by remember(fusoAtual.id) { mutableStateOf(false) }
+    var cidadeEditada by remember(fusoAtual.id) { mutableStateOf(fusoAtual.cidade) }
+    var paisEditado by remember(fusoAtual.id) { mutableStateOf(fusoAtual.pais) }
+    var erroEdicao by remember(fusoAtual.id) { mutableStateOf("") }
 
     var agora by remember {
         mutableStateOf(
@@ -180,6 +186,43 @@ fun DetalheFusoScreen(
                 color = TextoSecundario,
                 fontSize = 13.sp
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (editando) {
+                OutlinedTextField(
+                    value = cidadeEditada,
+                    onValueChange = { cidadeEditada = it },
+                    label = { Text("Nome da cidade") },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = paisEditado,
+                    onValueChange = { paisEditado = it },
+                    label = { Text("País") },
+                    singleLine = true
+                )
+                if (erroEdicao.isNotBlank()) Text(erroEdicao, color = Color(0xFFE18A75))
+                Button(onClick = {
+                    if (cidadeEditada.isBlank() || paisEditado.isBlank()) {
+                        erroEdicao = "Preencha cidade e país."
+                    } else {
+                        viewModel.atualizarFuso(
+                            fusoAtual.copy(cidade = cidadeEditada.trim(), pais = paisEditado.trim())
+                        )
+                        editando = false
+                        erroEdicao = ""
+                    }
+                }) { Text("Salvar alterações") }
+                Button(onClick = {
+                    cidadeEditada = fusoAtual.cidade
+                    paisEditado = fusoAtual.pais
+                    editando = false
+                    erroEdicao = ""
+                }) { Text("Cancelar") }
+            } else {
+                Button(onClick = { editando = true }) { Text("Editar informações") }
+            }
 
             Spacer(
                 modifier = Modifier.height(35.dp)
