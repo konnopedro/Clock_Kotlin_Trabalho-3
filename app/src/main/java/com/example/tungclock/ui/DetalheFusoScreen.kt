@@ -23,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,9 +87,10 @@ fun DetalheFusoScreen(
 
     val fusoAtual = fuso ?: return
 
-    var editando by remember(fusoAtual.id) { mutableStateOf(false) }
-    var cidadeEditada by remember(fusoAtual.id) { mutableStateOf(fusoAtual.cidade) }
-    var paisEditado by remember(fusoAtual.id) { mutableStateOf(fusoAtual.pais) }
+    val state by viewModel.uiState.collectAsState()
+    val editando = state.fusoEmEdicao == fusoAtual.id
+    val cidadeEditada = state.cidadeEdicao
+    val paisEditado = state.paisEdicao
     var erroEdicao by remember(fusoAtual.id) { mutableStateOf("") }
 
     var agora by remember {
@@ -192,17 +194,17 @@ fun DetalheFusoScreen(
             if (editando) {
                 OutlinedTextField(
                     value = cidadeEditada,
-                    onValueChange = { cidadeEditada = it },
+                    onValueChange = { viewModel.alterarCidade(it) },
                     label = { Text("Nome da cidade") },
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = paisEditado,
-                    onValueChange = { paisEditado = it },
+                    onValueChange = { viewModel.alterarPais(it) },
                     label = { Text("País") },
                     singleLine = true
                 )
-                if (erroEdicao.isNotBlank()) Text(erroEdicao, color = Color(0xFFE18A75))
+                if (erroEdicao.isNotBlank() || state.erro != null) Text(if (erroEdicao.isNotBlank()) erroEdicao else state.erro.orEmpty(), color = Color(0xFFE18A75))
                 Button(onClick = {
                     if (cidadeEditada.isBlank() || paisEditado.isBlank()) {
                         erroEdicao = "Preencha cidade e país."
@@ -210,18 +212,16 @@ fun DetalheFusoScreen(
                         viewModel.atualizarFuso(
                             fusoAtual.copy(cidade = cidadeEditada.trim(), pais = paisEditado.trim())
                         )
-                        editando = false
+                        viewModel.cancelarEdicao()
                         erroEdicao = ""
                     }
                 }) { Text("Salvar alterações") }
                 Button(onClick = {
-                    cidadeEditada = fusoAtual.cidade
-                    paisEditado = fusoAtual.pais
-                    editando = false
+                    viewModel.cancelarEdicao()
                     erroEdicao = ""
                 }) { Text("Cancelar") }
             } else {
-                Button(onClick = { editando = true }) { Text("Editar informações") }
+                Button(onClick = { viewModel.iniciarEdicao(fusoAtual) }) { Text("Editar informações") }
             }
 
             Spacer(
