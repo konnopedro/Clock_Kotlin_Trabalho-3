@@ -74,3 +74,31 @@ Os DAOs disponibilizam operações para inserir, listar, buscar por ID, atualiza
 **Desenvolvimento de Aplicativos Móveis — Trabalho 3**
 
 Projeto desenvolvido em Kotlin com Jetpack Compose.
+
+---
+
+## Trabalho 4 — Refatoração MVVM
+
+Esta branch reorganiza o aplicativo do Trabalho 3 mantendo as mesmas entidades Room, telas e navegação. A refatoração é feita no mesmo projeto; não há servidor, login ou banco remoto.
+
+### Antes e depois
+
+No Trabalho 3, as telas e o `AppNavigation` faziam consultas aos DAOs e mantinham listas de estado em memória. Depois da reorganização, as telas recebem listas atualizadas pelos `StateFlow` dos ViewModels e chamam seus métodos para inserir, atualizar ou excluir registros.
+
+### Camadas
+
+- **`data` (Model):** `Alarme`, `FusoHorario`, seus DAOs e `AppDatabase`. As consultas `buscarTodos()` emitem `Flow<List<...>>`.
+- **`data.repository`:** `AlarmeRepository` e `FusoHorarioRepository` são os pontos de acesso aos DAOs.
+- **`viewmodel`:** `AlarmeViewModel` e `FusoViewModel` coletam os fluxos de registros e expõem `uiState` público e `_uiState` privado. As Factories recebem cada Repository.
+- **`ui` (View):** telas Jetpack Compose de relógio, alarmes, fusos, detalhes, cronômetro e timer.
+- **`AppNavigation`:** mantém o `NavHost` e fornece os ViewModels criados pelas Factories.
+
+### Estados usados
+
+O `AlarmeUiState` guarda a lista de alarmes, o indicador de carregamento e uma mensagem de erro opcional. O `FusoUiState` faz o mesmo para a lista de fusos. O Room notifica mudanças nas tabelas e o ViewModel atualiza o estado sem exigir uma nova consulta manual após cada operação.
+
+### Decisões do trio e demonstração
+
+A arquitetura mantém uma Factory por ViewModel para deixar explícita a injeção de Repository, de acordo com os exemplos do professor. A documentação sobre divisão do trabalho, dificuldades individuais e como foram resolvidas deve ser preenchida pelos integrantes com fatos reais, sem inventar experiências.
+
+**Validação ainda necessária:** compilar no Android Studio ou GitHub Actions e demonstrar, com capturas de tela e vídeos, criação, listagem, atualização, exclusão e persistência ao fechar e reabrir o aplicativo. Anexar aqui os links de evidências e relatar qualquer problema realmente encontrado durante os testes.
