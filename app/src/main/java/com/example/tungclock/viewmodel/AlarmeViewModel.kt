@@ -2,7 +2,7 @@ package com.example.tungclock.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tungclock.Alarme
+import com.example.tungclock.data.Alarme
 import com.example.tungclock.data.repository.AlarmeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

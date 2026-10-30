@@ -1,5 +1,5 @@
 
-package com.example.tungclock
+package com.example.tungclock.data
 
 import android.content.Context
 import androidx.room.Database

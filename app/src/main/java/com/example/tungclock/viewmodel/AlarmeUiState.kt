@@ -1,6 +1,6 @@
 package com.example.tungclock.viewmodel
 
-import com.example.tungclock.Alarme
+import com.example.tungclock.data.Alarme
 
 data class AlarmeUiState(
     val alarmes: List<Alarme> = emptyList(),

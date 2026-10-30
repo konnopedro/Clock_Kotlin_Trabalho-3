@@ -1,4 +1,7 @@
-package com.example.tungclock
+package com.example.tungclock.ui
+
+import com.example.tungclock.data.Alarme
+import com.example.tungclock.data.FusoHorario
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

@@ -1,5 +1,5 @@
 
-package com.example.tungclock
+package com.example.tungclock.data
 
 import androidx.room.Dao
 import androidx.room.Delete

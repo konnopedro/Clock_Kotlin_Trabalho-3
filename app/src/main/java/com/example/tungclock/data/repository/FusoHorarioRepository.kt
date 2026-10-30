@@ -1,7 +1,7 @@
 package com.example.tungclock.data.repository
 
-import com.example.tungclock.FusoHorario
-import com.example.tungclock.FusoHorarioDao
+import com.example.tungclock.data.FusoHorario
+import com.example.tungclock.data.FusoHorarioDao
 import kotlinx.coroutines.flow.Flow
 
 /**

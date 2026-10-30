@@ -2,7 +2,7 @@ package com.example.tungclock.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tungclock.FusoHorario
+import com.example.tungclock.data.FusoHorario
 import com.example.tungclock.data.repository.FusoHorarioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

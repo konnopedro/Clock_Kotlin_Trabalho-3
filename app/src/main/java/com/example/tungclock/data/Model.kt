@@ -1,4 +1,4 @@
-package com.example.tungclock
+package com.example.tungclock.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

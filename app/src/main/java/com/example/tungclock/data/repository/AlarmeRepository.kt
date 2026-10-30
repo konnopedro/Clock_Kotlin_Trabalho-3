@@ -1,7 +1,7 @@
 package com.example.tungclock.data.repository
 
-import com.example.tungclock.Alarme
-import com.example.tungclock.AlarmeDao
+import com.example.tungclock.data.Alarme
+import com.example.tungclock.data.AlarmeDao
 import kotlinx.coroutines.flow.Flow
 
 /**
