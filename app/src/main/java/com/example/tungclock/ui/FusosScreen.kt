@@ -35,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -99,6 +100,7 @@ fun FusosScreen(
     var mostrarCidades by remember { mutableStateOf(false) }
     var fusoParaExcluir by remember { mutableStateOf<FusoHorario?>(null) }
     var erro by remember { mutableStateOf("") }
+    val state by viewModel.uiState.collectAsState()
 
 
     Scaffold(
@@ -131,6 +133,7 @@ fun FusosScreen(
             }
 
             Text("Acompanhe o horário em qualquer lugar do mundo.", color = TextoSecundario, fontSize = 13.sp)
+            if (state.erro != null) Text(state.erro.orEmpty(), color = Color(0xFFE18A75), fontSize = 12.sp)
             if (fusos.isEmpty()) {
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = CardFundo), border = BorderStroke(1.dp, Borda)) {
                     Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
