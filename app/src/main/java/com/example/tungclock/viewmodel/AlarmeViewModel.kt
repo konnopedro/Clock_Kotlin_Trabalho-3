@@ -1,5 +1,6 @@
 package com.example.tungclock.viewmodel
 
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tungclock.data.Alarme
@@ -28,13 +29,13 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
 
     fun reiniciarFormulario() {
         _uiState.update { it.copy(
-            horarioFormulario = "07:00", nomeFormulario = "",
+            horarioFormulario = TextFieldValue("07:00"), nomeFormulario = "",
             diasFormulario = setOf("Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"),
             erro = null
         ) }
     }
 
-    fun alterarHorarioFormulario(valor: String) {
+    fun alterarHorarioFormulario(valor: TextFieldValue) {
         _uiState.update { it.copy(horarioFormulario = valor) }
     }
 
@@ -52,7 +53,7 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
         _uiState.update {
             it.copy(
                 alarmeEmEdicao = alarme.id,
-                horarioEdicao = alarme.horario,
+                horarioEdicao = TextFieldValue(alarme.horario),
                 nomeEdicao = alarme.nome,
                 diasEdicao = dias,
                 ativoEdicao = alarme.ativo
@@ -60,7 +61,7 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
         }
     }
 
-    fun alterarHorarioEdicao(valor: String) {
+    fun alterarHorarioEdicao(valor: TextFieldValue) {
         _uiState.update { it.copy(horarioEdicao = valor) }
     }
 
