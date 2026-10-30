@@ -153,6 +153,7 @@ fun AppNavigation() {
                 DetalheAlarmeScreen(
                     id = entry.arguments?.getInt("id") ?: -1,
                     alarmes = alarmes,
+                    viewModel = alarmeViewModel,
                     onVoltar = { navController.popBackStack() }
                 )
             }
