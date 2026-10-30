@@ -176,6 +176,12 @@ fun AlarmesScreen(
                 }
             }
 
+            if (state.erro != null) {
+                item {
+                    Text(state.erro.orEmpty(), color = Color(0xFFE18A75), fontSize = 12.sp)
+                }
+            }
+
             if (alarmes.isEmpty()) {
                 item {
                     Card(
