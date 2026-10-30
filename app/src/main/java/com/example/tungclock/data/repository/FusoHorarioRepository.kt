@@ -2,13 +2,14 @@ package com.example.tungclock.data.repository
 
 import com.example.tungclock.FusoHorario
 import com.example.tungclock.FusoHorarioDao
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Centraliza o acesso aos fusos horários persistidos pelo Room.
  * A interface nunca deve acessar o DAO diretamente.
  */
 class FusoHorarioRepository(private val dao: FusoHorarioDao) {
-    suspend fun buscarTodos(): List<FusoHorario> = dao.buscarTodos()
+    fun buscarTodos(): Flow<List<FusoHorario>> = dao.buscarTodos()
 
     suspend fun buscarPorId(id: Int): FusoHorario? = dao.buscarPorId(id)
 
