@@ -26,6 +26,28 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
         }
     }
 
+    fun reiniciarFormulario() {
+        _uiState.update { it.copy(
+            horarioFormulario = "07:00", nomeFormulario = "",
+            diasFormulario = setOf("Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"),
+            erro = null
+        ) }
+    }
+
+    fun alterarHorarioFormulario(valor: String) {
+        _uiState.update { it.copy(horarioFormulario = valor) }
+    }
+
+    fun alterarNomeFormulario(valor: String) {
+        _uiState.update { it.copy(nomeFormulario = valor) }
+    }
+
+    fun alterarDiaFormulario(dia: String) {
+        _uiState.update {
+            it.copy(diasFormulario = if (dia in it.diasFormulario) it.diasFormulario - dia else it.diasFormulario + dia)
+        }
+    }
+
     fun adicionarAlarme(alarme: Alarme) = executar { repository.inserir(alarme) }
     fun atualizarAlarme(alarme: Alarme) = executar { repository.atualizar(alarme) }
     fun removerAlarme(alarme: Alarme) = executar { repository.excluir(alarme) }
