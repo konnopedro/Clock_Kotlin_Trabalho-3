@@ -55,23 +55,12 @@ private val TextoSecundario = Color(0xFFBCA18A)
 @Composable
 fun DetalheFusoScreen(
     id: Int,
-    fusos: SnapshotStateList<FusoHorario>,
+    fusos: List<FusoHorario>,
+    viewModel: com.example.tungclock.viewmodel.FusoViewModel,
     onVoltar: () -> Unit
 ) {
 
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val fusoDao = remember { database.fusoHorarioDao() }
-
-    var fuso by remember(id) {
-        mutableStateOf<FusoHorario?>(null)
-    }
-
-    LaunchedEffect(id) {
-        fuso = withContext(Dispatchers.IO) {
-            fusoDao.buscarPorId(id)
-        }
-    }
+    val fuso = fusos.firstOrNull { it.id == id }
 
     if (fuso == null) {
         Column(
