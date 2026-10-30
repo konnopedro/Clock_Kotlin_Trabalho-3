@@ -321,8 +321,7 @@ fun AlarmesScreen(
                         erro = "Digite um nome para o alarme."
                     } else {
                         val novoAlarme = Alarme(horario = novoHorario.text, nome = novoNome.trim(), dias = textoRepeticao(novosDias), ativo = true)
-                        viewModel.adicionarAlarme(novoAlarme)
-                        mostrarNovoAlarme = false
+                        viewModel.adicionarAlarme(novoAlarme, aoSalvar = { mostrarNovoAlarme = false })
                     }
                 }) { Text("Salvar", color = MadeiraClara) }
             },
@@ -345,8 +344,7 @@ fun AlarmesScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.removerAlarme(alarme)
-                    alarmeParaExcluir = null
+                    viewModel.removerAlarme(alarme, aoExcluir = { alarmeParaExcluir = null })
                 }) { Text("Excluir", color = Color(0xFFE18A75)) }
             },
             dismissButton = {
