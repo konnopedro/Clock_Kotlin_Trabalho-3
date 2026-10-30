@@ -48,6 +48,36 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
         }
     }
 
+    fun iniciarEdicao(alarme: Alarme, dias: Set<String>) {
+        _uiState.update {
+            it.copy(
+                alarmeEmEdicao = alarme.id,
+                horarioEdicao = alarme.horario,
+                nomeEdicao = alarme.nome,
+                diasEdicao = dias,
+                ativoEdicao = alarme.ativo
+            )
+        }
+    }
+
+    fun alterarHorarioEdicao(valor: String) {
+        _uiState.update { it.copy(horarioEdicao = valor) }
+    }
+
+    fun alterarNomeEdicao(valor: String) {
+        _uiState.update { it.copy(nomeEdicao = valor) }
+    }
+
+    fun alterarDiaEdicao(dia: String) {
+        _uiState.update {
+            it.copy(diasEdicao = if (dia in it.diasEdicao) it.diasEdicao - dia else it.diasEdicao + dia)
+        }
+    }
+
+    fun alterarAtivoEdicao(valor: Boolean) {
+        _uiState.update { it.copy(ativoEdicao = valor) }
+    }
+
     fun adicionarAlarme(alarme: Alarme) = executar { repository.inserir(alarme) }
     fun atualizarAlarme(alarme: Alarme) = executar { repository.atualizar(alarme) }
     fun removerAlarme(alarme: Alarme) = executar { repository.excluir(alarme) }
