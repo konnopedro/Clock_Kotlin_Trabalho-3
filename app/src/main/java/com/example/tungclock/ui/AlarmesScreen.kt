@@ -40,6 +40,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,9 +98,10 @@ fun AlarmesScreen(
     onAbrirDetalhes: (Int) -> Unit
 ) {
     var mostrarNovoAlarme by remember { mutableStateOf(false) }
-    var novoHorario by remember { mutableStateOf(TextFieldValue("07:00")) }
-    var novoNome by remember { mutableStateOf("") }
-    var novosDias by remember { mutableStateOf(DiasSemana.toSet()) }
+    val state by viewModel.uiState.collectAsState()
+    val novoHorario = TextFieldValue(state.horarioFormulario)
+    val novoNome = state.nomeFormulario
+    val novosDias = state.diasFormulario
     var erro by remember { mutableStateOf("") }
     var alarmeParaExcluir by remember { mutableStateOf<Alarme?>(null) }
 
@@ -111,9 +113,7 @@ fun AlarmesScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    novoHorario = TextFieldValue("07:00")
-                    novoNome = ""
-                    novosDias = DiasSemana.toSet()
+                    viewModel.reiniciarFormulario()
                     erro = ""
                     mostrarNovoAlarme = true
                 },
@@ -264,7 +264,7 @@ fun AlarmesScreen(
                     Text("Defina quando você quer ser lembrado.", color = TextoSecundario, fontSize = 13.sp)
                     OutlinedTextField(
                         value = novoHorario,
-                        onValueChange = { novoHorario = formatarEntradaHorario(it) },
+                        onValueChange = { viewModel.alterarHorarioFormulario(formatarEntradaHorario(it).text) },
                         label = { Text("Horário (HH:mm)") },
                         placeholder = { Text("07:30") },
                         singleLine = true,
@@ -274,7 +274,7 @@ fun AlarmesScreen(
                     )
                     OutlinedTextField(
                         value = novoNome,
-                        onValueChange = { novoNome = it },
+                        onValueChange = { viewModel.alterarNomeFormulario(it) },
                         label = { Text("Nome do alarme") },
                         placeholder = { Text("Acordar") },
                         singleLine = true,
@@ -290,7 +290,7 @@ fun AlarmesScreen(
                                     val selecionado = dia in novosDias
                                     FilterChip(
                                         selected = selecionado,
-                                        onClick = { novosDias = if (selecionado) novosDias - dia else novosDias + dia },
+                                        onClick = { viewModel.alterarDiaFormulario(dia) },
                                         label = { Text(dia, fontSize = 11.sp) },
                                         colors = FilterChipDefaults.filterChipColors(
                                             selectedContainerColor = MadeiraClara,
@@ -303,7 +303,7 @@ fun AlarmesScreen(
                             }
                         }
                     }
-                    if (erro.isNotBlank()) Text(erro, color = Color(0xFFE18A75), fontSize = 12.sp)
+                    if (erro.isNotBlank() || state.erro != null) Text(if (erro.isNotBlank()) erro else state.erro.orEmpty(), color = Color(0xFFE18A75), fontSize = 12.sp)
                 }
             },
             confirmButton = {
