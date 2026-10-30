@@ -29,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.first
 
 private val Fundo = Color(0xFF17120F)
 private val Divisoria = Color(0xFF493427)
@@ -63,16 +64,16 @@ fun AppNavigation() {
             val alarmeDao = database.alarmeDao()
             val fusoDao = database.fusoHorarioDao()
 
-            if (alarmeDao.buscarTodos().isEmpty()) {
+            if (alarmeDao.buscarTodos().first().isEmpty()) {
                 alarmeDao.inserir(Alarme(horario = "07:00", nome = "Acordar", dias = "Segunda a sexta", ativo = true))
                 alarmeDao.inserir(Alarme(horario = "12:00", nome = "Almoço", dias = "Todos os dias", ativo = false))
             }
-            if (fusoDao.buscarTodos().isEmpty()) {
+            if (fusoDao.buscarTodos().first().isEmpty()) {
                 fusoDao.inserir(FusoHorario(cidade = "São Paulo", pais = "Brasil", zona = "America/Sao_Paulo", offset = -3))
                 fusoDao.inserir(FusoHorario(cidade = "New York", pais = "Estados Unidos", zona = "America/New_York", offset = -4))
                 fusoDao.inserir(FusoHorario(cidade = "Londres", pais = "Reino Unido", zona = "Europe/London", offset = 1))
             }
-            Pair(alarmeDao.buscarTodos(), fusoDao.buscarTodos())
+            Pair(alarmeDao.buscarTodos().first(), fusoDao.buscarTodos().first())
         }
         alarmes.clear()
         alarmes.addAll(alarmesSalvos)
