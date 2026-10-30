@@ -93,20 +93,13 @@ private fun textoDosDiasSelecionados(selecionados: Set<String>): String {
 @Composable
 fun DetalheAlarmeScreen(
     id: Int,
-    alarmes: SnapshotStateList<Alarme>,
+    alarmes: List<Alarme>,
+    viewModel: com.example.tungclock.viewmodel.AlarmeViewModel,
     onVoltar: () -> Unit
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val alarmeDao = remember { database.alarmeDao() }
-    val scope = rememberCoroutineScope()
 
-    var alarme by remember(id) { mutableStateOf<Alarme?>(null) }
-    var carregou by remember(id) { mutableStateOf(false) }
-    LaunchedEffect(id) {
-        alarme = withContext(Dispatchers.IO) { alarmeDao.buscarPorId(id) }
-        carregou = true
-    }
+    val alarme = alarmes.firstOrNull { it.id == id }
+    val carregou = !viewModel.uiState.value.carregando
 
     if (!carregou || alarme == null) {
         Scaffold(
@@ -291,13 +284,8 @@ fun DetalheAlarmeScreen(
                             dias = textoDosDiasSelecionados(diasSelecionados),
                             ativo = ativo
                         )
-                        scope.launch {
-                            withContext(Dispatchers.IO) { alarmeDao.atualizar(atualizado) }
-                            val indice = alarmes.indexOfFirst { it.id == id }
-                            if (indice >= 0) alarmes[indice] = atualizado
-                            alarme = atualizado
-                            onVoltar()
-                        }
+                        viewModel.atualizarAlarme(atualizado)
+                        onVoltar()
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
