@@ -6,6 +6,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AlarmeDao {
@@ -13,7 +14,7 @@ interface AlarmeDao {
     suspend fun inserir(alarme: Alarme): Long
 
     @Query("SELECT * FROM alarmes ORDER BY id ASC")
-    suspend fun buscarTodos(): List<Alarme>
+    fun buscarTodos(): Flow<List<Alarme>>
 
     @Query("SELECT * FROM alarmes WHERE id = :id LIMIT 1")
     suspend fun buscarPorId(id: Int): Alarme?
