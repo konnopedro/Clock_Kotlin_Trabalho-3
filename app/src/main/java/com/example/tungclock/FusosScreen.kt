@@ -88,7 +88,8 @@ private val cidadesDisponiveis = listOf(
 @Composable
 fun FusosScreen(
     paddingValues: PaddingValues,
-    fusos: SnapshotStateList<FusoHorario>,
+    fusos: List<FusoHorario>,
+    viewModel: com.example.tungclock.viewmodel.FusoViewModel,
     onVoltar: () -> Unit,
     onAbrirDetalhes: (Int) -> Unit
 ) {
@@ -96,10 +97,6 @@ fun FusosScreen(
     var fusoParaExcluir by remember { mutableStateOf<FusoHorario?>(null) }
     var erro by remember { mutableStateOf("") }
 
-    val context = LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val fusoDao = remember { database.fusoHorarioDao() }
-    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.padding(paddingValues),
@@ -199,14 +196,8 @@ fun FusosScreen(
                                         val zoneId = ZoneId.of(cidade.zona)
                                         val offset = zoneId.rules.getOffset(Instant.now()).totalSeconds / 3600
                                         val novo = FusoHorario(cidade = cidade.cidade, pais = cidade.pais, zona = cidade.zona, offset = offset)
-                                        scope.launch {
-                                            val salvo = withContext(Dispatchers.IO) {
-                                                val id = fusoDao.inserir(novo)
-                                                fusoDao.buscarPorId(id.toInt())
-                                            }
-                                            salvo?.let { fusos.add(it) }
-                                            mostrarCidades = false
-                                        }
+                                        viewModel.adicionarFuso(novo)
+                                        mostrarCidades = false
                                     } catch (e: Exception) {
                                         erro = "Não foi possível adicionar essa cidade."
                                     }
@@ -235,11 +226,8 @@ fun FusosScreen(
             text = { Text("“" + fuso.cidade + "” será removida dos seus relógios mundiais.", color = TextoSecundario) },
             confirmButton = {
                 TextButton(onClick = {
-                    scope.launch {
-                        withContext(Dispatchers.IO) { fusoDao.excluir(fuso) }
-                        fusos.removeAll { it.id == fuso.id }
-                        fusoParaExcluir = null
-                    }
+                    viewModel.removerFuso(fuso)
+                    fusoParaExcluir = null
                 }) { Text("Remover", color = Color(0xFFE18A75)) }
             },
             dismissButton = { TextButton(onClick = { fusoParaExcluir = null }) { Text("Cancelar", color = TextoSecundario) } }
