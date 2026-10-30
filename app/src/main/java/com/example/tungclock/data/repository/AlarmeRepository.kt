@@ -2,13 +2,14 @@ package com.example.tungclock.data.repository
 
 import com.example.tungclock.Alarme
 import com.example.tungclock.AlarmeDao
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Centraliza o acesso aos alarmes persistidos pelo Room.
  * A interface nunca deve acessar o DAO diretamente.
  */
 class AlarmeRepository(private val dao: AlarmeDao) {
-    suspend fun buscarTodos(): List<Alarme> = dao.buscarTodos()
+    fun buscarTodos(): Flow<List<Alarme>> = dao.buscarTodos()
 
     suspend fun buscarPorId(id: Int): Alarme? = dao.buscarPorId(id)
 
