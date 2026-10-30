@@ -99,7 +99,7 @@ fun AlarmesScreen(
 ) {
     var mostrarNovoAlarme by remember { mutableStateOf(false) }
     val state by viewModel.uiState.collectAsState()
-    val novoHorario = TextFieldValue(state.horarioFormulario)
+    val novoHorario = state.horarioFormulario
     val novoNome = state.nomeFormulario
     val novosDias = state.diasFormulario
     var erro by remember { mutableStateOf("") }
@@ -270,7 +270,7 @@ fun AlarmesScreen(
                     Text("Defina quando você quer ser lembrado.", color = TextoSecundario, fontSize = 13.sp)
                     OutlinedTextField(
                         value = novoHorario,
-                        onValueChange = { viewModel.alterarHorarioFormulario(formatarEntradaHorario(it).text) },
+                        onValueChange = { viewModel.alterarHorarioFormulario(formatarEntradaHorario(it)) },
                         label = { Text("Horário (HH:mm)") },
                         placeholder = { Text("07:30") },
                         singleLine = true,
