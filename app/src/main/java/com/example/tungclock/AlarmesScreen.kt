@@ -88,7 +88,8 @@ private fun formatarEntradaHorario(entrada: TextFieldValue): TextFieldValue {
 @Composable
 fun AlarmesScreen(
     paddingValues: PaddingValues,
-    alarmes: SnapshotStateList<Alarme>,
+    alarmes: List<Alarme>,
+    viewModel: com.example.tungclock.viewmodel.AlarmeViewModel,
     onVoltar: () -> Unit,
     onAbrirDetalhes: (Int) -> Unit
 ) {
@@ -99,10 +100,6 @@ fun AlarmesScreen(
     var erro by remember { mutableStateOf("") }
     var alarmeParaExcluir by remember { mutableStateOf<Alarme?>(null) }
 
-    val context = LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val alarmeDao = remember { database.alarmeDao() }
-    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.padding(paddingValues),
@@ -237,11 +234,7 @@ fun AlarmesScreen(
                                         checked = alarme.ativo,
                                         onCheckedChange = { ativo ->
                                             val atualizado = alarme.copy(ativo = ativo)
-                                            scope.launch {
-                                                withContext(Dispatchers.IO) { alarmeDao.atualizar(atualizado) }
-                                                val index = alarmes.indexOfFirst { it.id == alarme.id }
-                                                if (index >= 0) alarmes[index] = atualizado
-                                            }
+                                            viewModel.atualizarAlarme(atualizado)
                                         }
                                     )
                                     IconButton(onClick = { alarmeParaExcluir = alarme }) {
@@ -319,14 +312,8 @@ fun AlarmesScreen(
                         erro = "Digite um nome para o alarme."
                     } else {
                         val novoAlarme = Alarme(horario = novoHorario.text, nome = novoNome.trim(), dias = textoRepeticao(novosDias), ativo = true)
-                        scope.launch {
-                            val salvo = withContext(Dispatchers.IO) {
-                                val id = alarmeDao.inserir(novoAlarme)
-                                alarmeDao.buscarPorId(id.toInt())
-                            }
-                            salvo?.let { alarmes.add(it) }
-                            mostrarNovoAlarme = false
-                        }
+                        viewModel.adicionarAlarme(novoAlarme)
+                        mostrarNovoAlarme = false
                     }
                 }) { Text("Salvar", color = MadeiraClara) }
             },
@@ -349,11 +336,8 @@ fun AlarmesScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    scope.launch {
-                        withContext(Dispatchers.IO) { alarmeDao.excluir(alarme) }
-                        alarmes.removeAll { it.id == alarme.id }
-                        alarmeParaExcluir = null
-                    }
+                    viewModel.removerAlarme(alarme)
+                    alarmeParaExcluir = null
                 }) { Text("Excluir", color = Color(0xFFE18A75)) }
             },
             dismissButton = {
