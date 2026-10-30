@@ -145,7 +145,7 @@ fun DetalheAlarmeScreen(
             viewModel.iniciarEdicao(alarmeAtual, diasSelecionadosDoTexto(alarmeAtual.dias))
         }
     }
-    val horario = TextFieldValue(state.horarioEdicao)
+    val horario = state.horarioEdicao
     val nome = state.nomeEdicao
     val diasSelecionados = state.diasEdicao
     val ativo = state.ativoEdicao
@@ -180,7 +180,7 @@ fun DetalheAlarmeScreen(
             OutlinedTextField(
                 value = horario,
                 onValueChange = { entrada ->
-                    viewModel.alterarHorarioEdicao(formatarEntradaHorario(entrada).text)
+                    viewModel.alterarHorarioEdicao(formatarEntradaHorario(entrada))
                     erro = ""
                 },
                 modifier = Modifier.fillMaxWidth(),
