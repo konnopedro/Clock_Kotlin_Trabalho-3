@@ -79,9 +79,9 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
         _uiState.update { it.copy(ativoEdicao = valor) }
     }
 
-    fun adicionarAlarme(alarme: Alarme) = executar { repository.inserir(alarme) }
+    fun adicionarAlarme(alarme: Alarme, aoSalvar: () -> Unit = {}) = executar(aoSalvar) { repository.inserir(alarme) }
     fun atualizarAlarme(alarme: Alarme, aoSalvar: () -> Unit = {}) = executar(aoSalvar) { repository.atualizar(alarme) }
-    fun removerAlarme(alarme: Alarme) = executar { repository.excluir(alarme) }
+    fun removerAlarme(alarme: Alarme, aoExcluir: () -> Unit = {}) = executar(aoExcluir) { repository.excluir(alarme) }
 
     private fun executar(aoConcluir: () -> Unit = {}, operacao: suspend () -> Unit) {
         viewModelScope.launch {
