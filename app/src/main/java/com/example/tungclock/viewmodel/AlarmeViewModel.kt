@@ -1,5 +1,6 @@
 package com.example.tungclock.viewmodel
 
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tungclock.data.Alarme
@@ -18,7 +19,7 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 repository.buscarTodos().collect { alarmes ->
-                    _uiState.update { it.copy(alarmes = alarmes, carregando = false, erro = null) }
+                    _uiState.update { it.copy(alarmes = alarmes, carregando = false) }
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(carregando = false, erro = e.message ?: "Erro ao buscar alarmes") }
@@ -28,13 +29,13 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
 
     fun reiniciarFormulario() {
         _uiState.update { it.copy(
-            horarioFormulario = "07:00", nomeFormulario = "",
+            horarioFormulario = TextFieldValue("07:00"), nomeFormulario = "",
             diasFormulario = setOf("Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"),
             erro = null
         ) }
     }
 
-    fun alterarHorarioFormulario(valor: String) {
+    fun alterarHorarioFormulario(valor: TextFieldValue) {
         _uiState.update { it.copy(horarioFormulario = valor) }
     }
 
@@ -52,7 +53,7 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
         _uiState.update {
             it.copy(
                 alarmeEmEdicao = alarme.id,
-                horarioEdicao = alarme.horario,
+                horarioEdicao = TextFieldValue(alarme.horario),
                 nomeEdicao = alarme.nome,
                 diasEdicao = dias,
                 ativoEdicao = alarme.ativo
@@ -60,7 +61,7 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
         }
     }
 
-    fun alterarHorarioEdicao(valor: String) {
+    fun alterarHorarioEdicao(valor: TextFieldValue) {
         _uiState.update { it.copy(horarioEdicao = valor) }
     }
 
@@ -78,15 +79,16 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
         _uiState.update { it.copy(ativoEdicao = valor) }
     }
 
-    fun adicionarAlarme(alarme: Alarme) = executar { repository.inserir(alarme) }
-    fun atualizarAlarme(alarme: Alarme) = executar { repository.atualizar(alarme) }
-    fun removerAlarme(alarme: Alarme) = executar { repository.excluir(alarme) }
+    fun adicionarAlarme(alarme: Alarme, aoSalvar: () -> Unit = {}) = executar(aoSalvar) { repository.inserir(alarme) }
+    fun atualizarAlarme(alarme: Alarme, aoSalvar: () -> Unit = {}) = executar(aoSalvar) { repository.atualizar(alarme) }
+    fun removerAlarme(alarme: Alarme, aoExcluir: () -> Unit = {}) = executar(aoExcluir) { repository.excluir(alarme) }
 
-    private fun executar(operacao: suspend () -> Unit) {
+    private fun executar(aoConcluir: () -> Unit = {}, operacao: suspend () -> Unit) {
         viewModelScope.launch {
             try {
                 operacao()
                 _uiState.update { it.copy(erro = null) }
+                aoConcluir()
             } catch (e: Exception) {
                 _uiState.update { it.copy(erro = e.message ?: "Erro ao salvar alarme") }
             }

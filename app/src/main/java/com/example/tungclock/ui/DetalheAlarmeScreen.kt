@@ -141,11 +141,9 @@ fun DetalheAlarmeScreen(
     val alarmeAtual = alarme!!
     val state by viewModel.uiState.collectAsState()
     LaunchedEffect(id) {
-        if (state.alarmeEmEdicao != id) {
-            viewModel.iniciarEdicao(alarmeAtual, diasSelecionadosDoTexto(alarmeAtual.dias))
-        }
+        viewModel.iniciarEdicao(alarmeAtual, diasSelecionadosDoTexto(alarmeAtual.dias))
     }
-    val horario = TextFieldValue(state.horarioEdicao)
+    val horario = state.horarioEdicao
     val nome = state.nomeEdicao
     val diasSelecionados = state.diasEdicao
     val ativo = state.ativoEdicao
@@ -180,7 +178,7 @@ fun DetalheAlarmeScreen(
             OutlinedTextField(
                 value = horario,
                 onValueChange = { entrada ->
-                    viewModel.alterarHorarioEdicao(formatarEntradaHorario(entrada).text)
+                    viewModel.alterarHorarioEdicao(formatarEntradaHorario(entrada))
                     erro = ""
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -274,9 +272,9 @@ fun DetalheAlarmeScreen(
                 Switch(checked = ativo, onCheckedChange = { viewModel.alterarAtivoEdicao(it) })
             }
 
-            if (erro.isNotBlank()) {
+            if (erro.isNotBlank() || state.erro != null) {
                 Spacer(Modifier.height(12.dp))
-                Text(erro, color = Color(0xFFE18A75), fontSize = 12.sp)
+                Text(if (erro.isNotBlank()) erro else state.erro.orEmpty(), color = Color(0xFFE18A75), fontSize = 12.sp)
             }
 
             Spacer(Modifier.height(22.dp))
@@ -294,8 +292,7 @@ fun DetalheAlarmeScreen(
                             dias = textoDosDiasSelecionados(diasSelecionados),
                             ativo = ativo
                         )
-                        viewModel.atualizarAlarme(atualizado)
-                        onVoltar()
+                        viewModel.atualizarAlarme(atualizado, aoSalvar = onVoltar)
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),

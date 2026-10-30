@@ -18,7 +18,7 @@ class FusoViewModel(private val repository: FusoHorarioRepository) : ViewModel()
         viewModelScope.launch {
             try {
                 repository.buscarTodos().collect { fusos ->
-                    _uiState.update { it.copy(fusos = fusos, carregando = false, erro = null) }
+                    _uiState.update { it.copy(fusos = fusos, carregando = false) }
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(carregando = false, erro = e.message ?: "Erro ao buscar fusos") }
@@ -42,15 +42,16 @@ class FusoViewModel(private val repository: FusoHorarioRepository) : ViewModel()
         _uiState.update { it.copy(fusoEmEdicao = null, cidadeEdicao = "", paisEdicao = "") }
     }
 
-    fun adicionarFuso(fuso: FusoHorario) = executar { repository.inserir(fuso) }
-    fun atualizarFuso(fuso: FusoHorario) = executar { repository.atualizar(fuso) }
-    fun removerFuso(fuso: FusoHorario) = executar { repository.excluir(fuso) }
+    fun adicionarFuso(fuso: FusoHorario, aoSalvar: () -> Unit = {}) = executar(aoSalvar) { repository.inserir(fuso) }
+    fun atualizarFuso(fuso: FusoHorario, aoSalvar: () -> Unit = {}) = executar(aoSalvar) { repository.atualizar(fuso) }
+    fun removerFuso(fuso: FusoHorario, aoExcluir: () -> Unit = {}) = executar(aoExcluir) { repository.excluir(fuso) }
 
-    private fun executar(operacao: suspend () -> Unit) {
+    private fun executar(aoConcluir: () -> Unit = {}, operacao: suspend () -> Unit) {
         viewModelScope.launch {
             try {
                 operacao()
                 _uiState.update { it.copy(erro = null) }
+                aoConcluir()
             } catch (e: Exception) {
                 _uiState.update { it.copy(erro = e.message ?: "Erro ao salvar fuso") }
             }

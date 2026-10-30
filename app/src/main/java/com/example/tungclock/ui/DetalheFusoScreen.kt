@@ -121,19 +121,21 @@ fun DetalheFusoScreen(
         ZoneId.of("America/Sao_Paulo")
     )
 
-    val diferenca =
-        fusoAtual.offset - (-3)
+    val diferencaMinutos = (
+        agora.offset.totalSeconds -
+        agoraSaoPaulo.offset.totalSeconds
+    ) / 60
 
     val textoDiferenca = when {
-
-        diferenca == 0 ->
-            "Mesmo horário de São Paulo"
-
-        diferenca > 0 ->
-            "${diferenca} hora(s) à frente de São Paulo"
-
-        else ->
-            "${-diferenca} hora(s) atrás de São Paulo"
+        diferencaMinutos == 0 -> "Mesmo horário de São Paulo"
+        else -> {
+            val adiantado = diferencaMinutos > 0
+            val minutos = kotlin.math.abs(diferencaMinutos)
+            val horas = minutos / 60
+            val resto = minutos % 60
+            val intervalo = if (resto == 0) "${horas}h" else "${horas}h ${resto}min"
+            "${intervalo} ${if (adiantado) "à frente" else "atrás"} de São Paulo"
+        }
     }
 
     Scaffold(
@@ -210,10 +212,12 @@ fun DetalheFusoScreen(
                         erroEdicao = "Preencha cidade e país."
                     } else {
                         viewModel.atualizarFuso(
-                            fusoAtual.copy(cidade = cidadeEditada.trim(), pais = paisEditado.trim())
+                            fusoAtual.copy(cidade = cidadeEditada.trim(), pais = paisEditado.trim()),
+                            aoSalvar = {
+                                viewModel.cancelarEdicao()
+                                erroEdicao = ""
+                            }
                         )
-                        viewModel.cancelarEdicao()
-                        erroEdicao = ""
                     }
                 }) { Text("Salvar alterações") }
                 Button(onClick = {
@@ -249,10 +253,7 @@ fun DetalheFusoScreen(
             )
 
             Text(
-                text = "UTC ${
-                    if (fusoAtual.offset >= 0) "+"
-                    else ""
-                }${fusoAtual.offset}",
+                text = "UTC${agora.offset.id.let { if (it == "Z") "+00:00" else it }}",
                 color = Azul,
                 fontSize = 13.sp
             )
@@ -338,7 +339,7 @@ fun DetalheFusoScreen(
             )
 
             Text(
-                text = "A diferença acima é calculada a partir do UTC do fuso selecionado e do UTC−3 de São Paulo.",
+                text = "A diferença acima considera os offsets atuais das cidades, incluindo mudanças de horário de verão.",
                 color = TextoSecundario,
                 fontSize = 11.sp
             )

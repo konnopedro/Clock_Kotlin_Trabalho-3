@@ -202,8 +202,7 @@ fun FusosScreen(
                                         val zoneId = ZoneId.of(cidade.zona)
                                         val offset = zoneId.rules.getOffset(Instant.now()).totalSeconds / 3600
                                         val novo = FusoHorario(cidade = cidade.cidade, pais = cidade.pais, zona = cidade.zona, offset = offset)
-                                        viewModel.adicionarFuso(novo)
-                                        mostrarCidades = false
+                                        viewModel.adicionarFuso(novo, aoSalvar = { mostrarCidades = false })
                                     } catch (e: Exception) {
                                         erro = "Não foi possível adicionar essa cidade."
                                     }
@@ -232,8 +231,7 @@ fun FusosScreen(
             text = { Text("“" + fuso.cidade + "” será removida dos seus relógios mundiais.", color = TextoSecundario) },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.removerFuso(fuso)
-                    fusoParaExcluir = null
+                    viewModel.removerFuso(fuso, aoExcluir = { fusoParaExcluir = null })
                 }) { Text("Remover", color = Color(0xFFE18A75)) }
             },
             dismissButton = { TextButton(onClick = { fusoParaExcluir = null }) { Text("Cancelar", color = TextoSecundario) } }

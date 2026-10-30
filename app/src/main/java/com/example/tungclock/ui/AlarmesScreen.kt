@@ -99,7 +99,7 @@ fun AlarmesScreen(
 ) {
     var mostrarNovoAlarme by remember { mutableStateOf(false) }
     val state by viewModel.uiState.collectAsState()
-    val novoHorario = TextFieldValue(state.horarioFormulario)
+    val novoHorario = state.horarioFormulario
     val novoNome = state.nomeFormulario
     val novosDias = state.diasFormulario
     var erro by remember { mutableStateOf("") }
@@ -270,7 +270,7 @@ fun AlarmesScreen(
                     Text("Defina quando você quer ser lembrado.", color = TextoSecundario, fontSize = 13.sp)
                     OutlinedTextField(
                         value = novoHorario,
-                        onValueChange = { viewModel.alterarHorarioFormulario(formatarEntradaHorario(it).text) },
+                        onValueChange = { viewModel.alterarHorarioFormulario(formatarEntradaHorario(it)) },
                         label = { Text("Horário (HH:mm)") },
                         placeholder = { Text("07:30") },
                         singleLine = true,
@@ -321,8 +321,7 @@ fun AlarmesScreen(
                         erro = "Digite um nome para o alarme."
                     } else {
                         val novoAlarme = Alarme(horario = novoHorario.text, nome = novoNome.trim(), dias = textoRepeticao(novosDias), ativo = true)
-                        viewModel.adicionarAlarme(novoAlarme)
-                        mostrarNovoAlarme = false
+                        viewModel.adicionarAlarme(novoAlarme, aoSalvar = { mostrarNovoAlarme = false })
                     }
                 }) { Text("Salvar", color = MadeiraClara) }
             },
@@ -345,8 +344,7 @@ fun AlarmesScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.removerAlarme(alarme)
-                    alarmeParaExcluir = null
+                    viewModel.removerAlarme(alarme, aoExcluir = { alarmeParaExcluir = null })
                 }) { Text("Excluir", color = Color(0xFFE18A75)) }
             },
             dismissButton = {
