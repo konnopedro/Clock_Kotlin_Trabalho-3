@@ -253,10 +253,7 @@ fun DetalheFusoScreen(
             )
 
             Text(
-                text = "UTC ${
-                    if (fusoAtual.offset >= 0) "+"
-                    else ""
-                }${fusoAtual.offset}",
+                text = "UTC${agora.offset.id.let { if (it == "Z") "+00:00" else it }}",
                 color = Azul,
                 fontSize = 13.sp
             )
