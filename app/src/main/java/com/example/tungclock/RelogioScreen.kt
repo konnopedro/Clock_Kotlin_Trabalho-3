@@ -57,7 +57,7 @@ private val Borda = Color(0xFF493427)
 @Composable
 fun RelogioScreen(
     paddingValues: PaddingValues,
-    fusos: SnapshotStateList<FusoHorario>,
+    fusos: List<FusoHorario>,
     onAbrirAlarmes: () -> Unit,
     onAbrirFusos: () -> Unit,
     onAbrirDetalhesFuso: (Int) -> Unit
