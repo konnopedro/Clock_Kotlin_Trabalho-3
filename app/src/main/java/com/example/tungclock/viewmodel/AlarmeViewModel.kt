@@ -19,7 +19,7 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 repository.buscarTodos().collect { alarmes ->
-                    _uiState.update { it.copy(alarmes = alarmes, carregando = false, erro = null) }
+                    _uiState.update { it.copy(alarmes = alarmes, carregando = false) }
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(carregando = false, erro = e.message ?: "Erro ao buscar alarmes") }
@@ -80,14 +80,15 @@ class AlarmeViewModel(private val repository: AlarmeRepository) : ViewModel() {
     }
 
     fun adicionarAlarme(alarme: Alarme) = executar { repository.inserir(alarme) }
-    fun atualizarAlarme(alarme: Alarme) = executar { repository.atualizar(alarme) }
+    fun atualizarAlarme(alarme: Alarme, aoSalvar: () -> Unit = {}) = executar(aoSalvar) { repository.atualizar(alarme) }
     fun removerAlarme(alarme: Alarme) = executar { repository.excluir(alarme) }
 
-    private fun executar(operacao: suspend () -> Unit) {
+    private fun executar(aoConcluir: () -> Unit = {}, operacao: suspend () -> Unit) {
         viewModelScope.launch {
             try {
                 operacao()
                 _uiState.update { it.copy(erro = null) }
+                aoConcluir()
             } catch (e: Exception) {
                 _uiState.update { it.copy(erro = e.message ?: "Erro ao salvar alarme") }
             }
