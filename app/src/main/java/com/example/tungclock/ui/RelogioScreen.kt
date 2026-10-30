@@ -1,4 +1,7 @@
-package com.example.tungclock
+package com.example.tungclock.ui
+
+import com.example.tungclock.data.Alarme
+import com.example.tungclock.data.FusoHorario
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -57,7 +60,7 @@ private val Borda = Color(0xFF493427)
 @Composable
 fun RelogioScreen(
     paddingValues: PaddingValues,
-    fusos: SnapshotStateList<FusoHorario>,
+    fusos: List<FusoHorario>,
     onAbrirAlarmes: () -> Unit,
     onAbrirFusos: () -> Unit,
     onAbrirDetalhesFuso: (Int) -> Unit

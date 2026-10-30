@@ -4,7 +4,7 @@ name: Gerar APK Android
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, trabalho-4]
 
 permissions:
   contents: read

@@ -1,4 +1,7 @@
-package com.example.tungclock
+package com.example.tungclock.ui
+
+import com.example.tungclock.data.Alarme
+import com.example.tungclock.data.FusoHorario
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,20 +97,13 @@ private fun textoDosDiasSelecionados(selecionados: Set<String>): String {
 @Composable
 fun DetalheAlarmeScreen(
     id: Int,
-    alarmes: SnapshotStateList<Alarme>,
+    alarmes: List<Alarme>,
+    viewModel: com.example.tungclock.viewmodel.AlarmeViewModel,
     onVoltar: () -> Unit
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val alarmeDao = remember { database.alarmeDao() }
-    val scope = rememberCoroutineScope()
 
-    var alarme by remember(id) { mutableStateOf<Alarme?>(null) }
-    var carregou by remember(id) { mutableStateOf(false) }
-    LaunchedEffect(id) {
-        alarme = withContext(Dispatchers.IO) { alarmeDao.buscarPorId(id) }
-        carregou = true
-    }
+    val alarme = alarmes.firstOrNull { it.id == id }
+    val carregou = !viewModel.uiState.value.carregando
 
     if (!carregou || alarme == null) {
         Scaffold(
@@ -142,10 +139,16 @@ fun DetalheAlarmeScreen(
     }
 
     val alarmeAtual = alarme!!
-    var horario by remember(id) { mutableStateOf(TextFieldValue(alarmeAtual.horario)) }
-    var nome by remember(id) { mutableStateOf(alarmeAtual.nome) }
-    var diasSelecionados by remember(id) { mutableStateOf(diasSelecionadosDoTexto(alarmeAtual.dias)) }
-    var ativo by remember(id) { mutableStateOf(alarmeAtual.ativo) }
+    val state by viewModel.uiState.collectAsState()
+    LaunchedEffect(id) {
+        if (state.alarmeEmEdicao != id) {
+            viewModel.iniciarEdicao(alarmeAtual, diasSelecionadosDoTexto(alarmeAtual.dias))
+        }
+    }
+    val horario = TextFieldValue(state.horarioEdicao)
+    val nome = state.nomeEdicao
+    val diasSelecionados = state.diasEdicao
+    val ativo = state.ativoEdicao
     var erro by remember(id) { mutableStateOf("") }
 
     Scaffold(
@@ -177,7 +180,7 @@ fun DetalheAlarmeScreen(
             OutlinedTextField(
                 value = horario,
                 onValueChange = { entrada ->
-                    horario = formatarEntradaHorario(entrada)
+                    viewModel.alterarHorarioEdicao(formatarEntradaHorario(entrada).text)
                     erro = ""
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -200,7 +203,7 @@ fun DetalheAlarmeScreen(
 
             OutlinedTextField(
                 value = nome,
-                onValueChange = { nome = it; erro = "" },
+                onValueChange = { viewModel.alterarNomeEdicao(it); erro = "" },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Nome do alarme") },
                 singleLine = true,
@@ -238,7 +241,7 @@ fun DetalheAlarmeScreen(
                             FilterChip(
                                 selected = selecionado,
                                 onClick = {
-                                    diasSelecionados = if (selecionado) diasSelecionados - dia else diasSelecionados + dia
+                                    viewModel.alterarDiaEdicao(dia)
                                     erro = ""
                                 },
                                 label = { Text(dia.take(3), fontSize = 12.sp) },
@@ -268,7 +271,7 @@ fun DetalheAlarmeScreen(
                         fontSize = 12.sp
                     )
                 }
-                Switch(checked = ativo, onCheckedChange = { ativo = it })
+                Switch(checked = ativo, onCheckedChange = { viewModel.alterarAtivoEdicao(it) })
             }
 
             if (erro.isNotBlank()) {
@@ -291,13 +294,8 @@ fun DetalheAlarmeScreen(
                             dias = textoDosDiasSelecionados(diasSelecionados),
                             ativo = ativo
                         )
-                        scope.launch {
-                            withContext(Dispatchers.IO) { alarmeDao.atualizar(atualizado) }
-                            val indice = alarmes.indexOfFirst { it.id == id }
-                            if (indice >= 0) alarmes[indice] = atualizado
-                            alarme = atualizado
-                            onVoltar()
-                        }
+                        viewModel.atualizarAlarme(atualizado)
+                        onVoltar()
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),

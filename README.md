@@ -22,31 +22,41 @@ Aplicativo Android de relógio desenvolvido em **Kotlin** com **Jetpack Compose*
 - Gradle
 - JDK 17
 
-## Organização do projeto
+## Organização do projeto (Trabalho 4 — MVVM)
 
-Os principais arquivos da aplicação ficam em `app/src/main/java/com/example/tungclock/`:
+O aplicativo continua com as sete telas anteriores. A refatoração separa o acesso ao banco da interface, sem adicionar serviços externos.
 
-| Arquivo | Responsabilidade |
+| Pacote | Responsabilidade |
 | --- | --- |
-| `MainActivity.kt` | Ponto de entrada da aplicação. |
-| `AppNavigation.kt` | Organiza a navegação entre as telas e carrega os dados persistidos. |
-| `RelogioScreen.kt` | Tela do relógio. |
-| `CronometroScreen.kt` | Tela do cronômetro. |
-| `TimerScreen.kt` | Tela do timer. |
-| `AlarmesScreen.kt` | Lista, cadastro e exclusão de alarmes. |
-| `DetalheAlarmeScreen.kt` | Consulta e edição de um alarme selecionado. |
-| `FusosScreen.kt` | Lista, cadastro e exclusão de fusos horários. |
-| `DetalheFusoScreen.kt` | Exibe o horário atual do fuso e a comparação com São Paulo. |
-| `Model.kt` | Define as entidades `Alarme` e `FusoHorario` do Room. |
-| `AlarmeDao.kt` | Operações de consulta e alteração dos alarmes no banco. |
-| `FusoHorarioDao.kt` | Operações de consulta e alteração dos fusos no banco. |
-| `AppDataBase.kt` | Configuração e instância singleton do banco de dados. |
+| `data` | `Alarme`, `FusoHorario`, DAOs e `AppDatabase`, mantendo as tabelas Room existentes. |
+| `data.repository` | `AlarmeRepository` e `FusoHorarioRepository`: únicas classes de domínio que acessam os DAOs. |
+| `viewmodel` | `AlarmeViewModel`, `FusoViewModel`, os respectivos `UiState` e as `ViewModelFactory`. |
+| `ui` | Telas Compose, sem operações diretas no banco. |
+| raiz | `MainActivity` e `AppNavigation`, onde a navegação e a criação dos ViewModels são ligadas às telas. |
+
+### Decisões de arquitetura
+
+**Antes (Trabalho 3):** os Composables consultavam o DAO diretamente, acionavam corrotinas para gravar registros e atualizavam as listas manualmente.
+
+**Depois (Trabalho 4):** a tela chama ações do ViewModel; ele acessa o Repository, que chama o DAO. A consulta `buscarTodos()` dos dois DAOs retorna `Flow<List<...>>`; o ViewModel coleta esse fluxo e expõe `MutableStateFlow` privado com `StateFlow` público. As telas observam o estado e se redesenham quando a lista muda.
+
+Os `AlarmeUiState` e `FusoUiState` agrupam a lista, o indicador de carregamento e a mensagem de erro. As `ViewModelFactory` recebem os Repositories e os fornecem aos ViewModels, sem usar Hilt. O Room continua local, com as mesmas entidades e nome do banco.
+
+### Evidências e apresentação (a completar pelo trio)
+
+Incluam capturas ou links de vídeos feitos **no aplicativo em execução**, demonstrando:
+- criação, edição, ativação/desativação e exclusão de um alarme;
+- inclusão e exclusão de cidades e navegação para os detalhes;
+- fechamento completo e reabertura do aplicativo, confirmando os dados persistidos;
+- exibição da estrutura `ui / data / data.repository / viewmodel` no Android Studio.
+
+**Dificuldades e participação do trio:** registrar aqui, com as próprias palavras, os problemas reais encontrados e como cada integrante ajudou a resolvê-los. Não preencher com ocorrências inventadas.
 
 ## Persistência com Room
 
 O banco local utilizado pela aplicação é `tungclock_database`. Ele contém as entidades `Alarme` e `FusoHorario`, com identificadores gerados automaticamente.
 
-Os DAOs disponibilizam operações para inserir, listar, buscar por ID, atualizar e excluir registros. Ao iniciar o aplicativo, os dados são carregados do banco. Exemplos iniciais são inseridos apenas quando a tabela correspondente está vazia. As operações de acesso ao banco são executadas em `Dispatchers.IO`.
+Os DAOs disponibilizam operações para inserir, listar, buscar por ID, atualizar e excluir registros. As consultas de listas usam `Flow`, e as gravações são realizadas pelos ViewModels com `viewModelScope`. O banco permanece no dispositivo.
 
 ## Como executar
 
@@ -74,3 +84,31 @@ Os DAOs disponibilizam operações para inserir, listar, buscar por ID, atualiza
 **Desenvolvimento de Aplicativos Móveis — Trabalho 3**
 
 Projeto desenvolvido em Kotlin com Jetpack Compose.
+
+---
+
+## Trabalho 4 — Refatoração MVVM
+
+Esta branch reorganiza o aplicativo do Trabalho 3 mantendo as mesmas entidades Room, telas e navegação. A refatoração é feita no mesmo projeto; não há servidor, login ou banco remoto.
+
+### Antes e depois
+
+No Trabalho 3, as telas e o `AppNavigation` faziam consultas aos DAOs e mantinham listas de estado em memória. Depois da reorganização, as telas recebem listas atualizadas pelos `StateFlow` dos ViewModels e chamam seus métodos para inserir, atualizar ou excluir registros.
+
+### Camadas
+
+- **`data` (Model):** `Alarme`, `FusoHorario`, seus DAOs e `AppDatabase`. As consultas `buscarTodos()` emitem `Flow<List<...>>`.
+- **`data.repository`:** `AlarmeRepository` e `FusoHorarioRepository` são os pontos de acesso aos DAOs.
+- **`viewmodel`:** `AlarmeViewModel` e `FusoViewModel` coletam os fluxos de registros e expõem `uiState` público e `_uiState` privado. As Factories recebem cada Repository.
+- **`ui` (View):** telas Jetpack Compose de relógio, alarmes, fusos, detalhes, cronômetro e timer.
+- **`AppNavigation`:** mantém o `NavHost` e fornece os ViewModels criados pelas Factories.
+
+### Estados usados
+
+O `AlarmeUiState` guarda a lista de alarmes, o indicador de carregamento e uma mensagem de erro opcional. O `FusoUiState` faz o mesmo para a lista de fusos. O Room notifica mudanças nas tabelas e o ViewModel atualiza o estado sem exigir uma nova consulta manual após cada operação.
+
+### Decisões do trio e demonstração
+
+A arquitetura mantém uma Factory por ViewModel para deixar explícita a injeção de Repository, de acordo com os exemplos do professor. A documentação sobre divisão do trabalho, dificuldades individuais e como foram resolvidas deve ser preenchida pelos integrantes com fatos reais, sem inventar experiências.
+
+**Validação ainda necessária:** compilar no Android Studio ou GitHub Actions e demonstrar, com capturas de tela e vídeos, criação, listagem, atualização, exclusão e persistência ao fechar e reabrir o aplicativo. Anexar aqui os links de evidências e relatar qualquer problema realmente encontrado durante os testes.

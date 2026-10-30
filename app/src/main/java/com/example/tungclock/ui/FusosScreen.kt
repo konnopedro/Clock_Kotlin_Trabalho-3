@@ -1,4 +1,7 @@
-package com.example.tungclock
+package com.example.tungclock.ui
+
+import com.example.tungclock.data.Alarme
+import com.example.tungclock.data.FusoHorario
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -32,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -88,18 +92,16 @@ private val cidadesDisponiveis = listOf(
 @Composable
 fun FusosScreen(
     paddingValues: PaddingValues,
-    fusos: SnapshotStateList<FusoHorario>,
+    fusos: List<FusoHorario>,
+    viewModel: com.example.tungclock.viewmodel.FusoViewModel,
     onVoltar: () -> Unit,
     onAbrirDetalhes: (Int) -> Unit
 ) {
     var mostrarCidades by remember { mutableStateOf(false) }
     var fusoParaExcluir by remember { mutableStateOf<FusoHorario?>(null) }
     var erro by remember { mutableStateOf("") }
+    val state by viewModel.uiState.collectAsState()
 
-    val context = LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val fusoDao = remember { database.fusoHorarioDao() }
-    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.padding(paddingValues),
@@ -131,6 +133,7 @@ fun FusosScreen(
             }
 
             Text("Acompanhe o horário em qualquer lugar do mundo.", color = TextoSecundario, fontSize = 13.sp)
+            if (state.erro != null) Text(state.erro.orEmpty(), color = Color(0xFFE18A75), fontSize = 12.sp)
             if (fusos.isEmpty()) {
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = CardFundo), border = BorderStroke(1.dp, Borda)) {
                     Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -199,14 +202,8 @@ fun FusosScreen(
                                         val zoneId = ZoneId.of(cidade.zona)
                                         val offset = zoneId.rules.getOffset(Instant.now()).totalSeconds / 3600
                                         val novo = FusoHorario(cidade = cidade.cidade, pais = cidade.pais, zona = cidade.zona, offset = offset)
-                                        scope.launch {
-                                            val salvo = withContext(Dispatchers.IO) {
-                                                val id = fusoDao.inserir(novo)
-                                                fusoDao.buscarPorId(id.toInt())
-                                            }
-                                            salvo?.let { fusos.add(it) }
-                                            mostrarCidades = false
-                                        }
+                                        viewModel.adicionarFuso(novo)
+                                        mostrarCidades = false
                                     } catch (e: Exception) {
                                         erro = "Não foi possível adicionar essa cidade."
                                     }
@@ -235,11 +232,8 @@ fun FusosScreen(
             text = { Text("“" + fuso.cidade + "” será removida dos seus relógios mundiais.", color = TextoSecundario) },
             confirmButton = {
                 TextButton(onClick = {
-                    scope.launch {
-                        withContext(Dispatchers.IO) { fusoDao.excluir(fuso) }
-                        fusos.removeAll { it.id == fuso.id }
-                        fusoParaExcluir = null
-                    }
+                    viewModel.removerFuso(fuso)
+                    fusoParaExcluir = null
                 }) { Text("Remover", color = Color(0xFFE18A75)) }
             },
             dismissButton = { TextButton(onClick = { fusoParaExcluir = null }) { Text("Cancelar", color = TextoSecundario) } }

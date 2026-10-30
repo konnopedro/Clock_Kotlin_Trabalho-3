@@ -1,18 +1,8 @@
-package com.example.tungclock
+package com.example.tungclock.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.ColumnInfo
-
-@Entity(tableName = "alarmes")
-data class Alarme(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val horario: String,
-    val nome: String,
-    val dias: String,
-    var ativo: Boolean
-)
 
 @Entity(tableName = "fusos_horarios")
 data class FusoHorario(
@@ -24,4 +14,3 @@ data class FusoHorario(
     @ColumnInfo(name = "utc_offset")
     val offset: Int
 )
-

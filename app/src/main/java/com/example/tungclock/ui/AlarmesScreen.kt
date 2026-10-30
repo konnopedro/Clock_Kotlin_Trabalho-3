@@ -1,4 +1,7 @@
-package com.example.tungclock
+package com.example.tungclock.ui
+
+import com.example.tungclock.data.Alarme
+import com.example.tungclock.data.FusoHorario
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -37,6 +40,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -88,21 +92,19 @@ private fun formatarEntradaHorario(entrada: TextFieldValue): TextFieldValue {
 @Composable
 fun AlarmesScreen(
     paddingValues: PaddingValues,
-    alarmes: SnapshotStateList<Alarme>,
+    alarmes: List<Alarme>,
+    viewModel: com.example.tungclock.viewmodel.AlarmeViewModel,
     onVoltar: () -> Unit,
     onAbrirDetalhes: (Int) -> Unit
 ) {
     var mostrarNovoAlarme by remember { mutableStateOf(false) }
-    var novoHorario by remember { mutableStateOf(TextFieldValue("07:00")) }
-    var novoNome by remember { mutableStateOf("") }
-    var novosDias by remember { mutableStateOf(DiasSemana.toSet()) }
+    val state by viewModel.uiState.collectAsState()
+    val novoHorario = TextFieldValue(state.horarioFormulario)
+    val novoNome = state.nomeFormulario
+    val novosDias = state.diasFormulario
     var erro by remember { mutableStateOf("") }
     var alarmeParaExcluir by remember { mutableStateOf<Alarme?>(null) }
 
-    val context = LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val alarmeDao = remember { database.alarmeDao() }
-    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.padding(paddingValues),
@@ -111,9 +113,7 @@ fun AlarmesScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    novoHorario = TextFieldValue("07:00")
-                    novoNome = ""
-                    novosDias = DiasSemana.toSet()
+                    viewModel.reiniciarFormulario()
                     erro = ""
                     mostrarNovoAlarme = true
                 },
@@ -173,6 +173,12 @@ fun AlarmesScreen(
                         color = TextoSecundario,
                         fontSize = 13.sp
                     )
+                }
+            }
+
+            if (state.erro != null) {
+                item {
+                    Text(state.erro.orEmpty(), color = Color(0xFFE18A75), fontSize = 12.sp)
                 }
             }
 
@@ -237,11 +243,7 @@ fun AlarmesScreen(
                                         checked = alarme.ativo,
                                         onCheckedChange = { ativo ->
                                             val atualizado = alarme.copy(ativo = ativo)
-                                            scope.launch {
-                                                withContext(Dispatchers.IO) { alarmeDao.atualizar(atualizado) }
-                                                val index = alarmes.indexOfFirst { it.id == alarme.id }
-                                                if (index >= 0) alarmes[index] = atualizado
-                                            }
+                                            viewModel.atualizarAlarme(atualizado)
                                         }
                                     )
                                     IconButton(onClick = { alarmeParaExcluir = alarme }) {
@@ -268,7 +270,7 @@ fun AlarmesScreen(
                     Text("Defina quando você quer ser lembrado.", color = TextoSecundario, fontSize = 13.sp)
                     OutlinedTextField(
                         value = novoHorario,
-                        onValueChange = { novoHorario = formatarEntradaHorario(it) },
+                        onValueChange = { viewModel.alterarHorarioFormulario(formatarEntradaHorario(it).text) },
                         label = { Text("Horário (HH:mm)") },
                         placeholder = { Text("07:30") },
                         singleLine = true,
@@ -278,7 +280,7 @@ fun AlarmesScreen(
                     )
                     OutlinedTextField(
                         value = novoNome,
-                        onValueChange = { novoNome = it },
+                        onValueChange = { viewModel.alterarNomeFormulario(it) },
                         label = { Text("Nome do alarme") },
                         placeholder = { Text("Acordar") },
                         singleLine = true,
@@ -294,7 +296,7 @@ fun AlarmesScreen(
                                     val selecionado = dia in novosDias
                                     FilterChip(
                                         selected = selecionado,
-                                        onClick = { novosDias = if (selecionado) novosDias - dia else novosDias + dia },
+                                        onClick = { viewModel.alterarDiaFormulario(dia) },
                                         label = { Text(dia, fontSize = 11.sp) },
                                         colors = FilterChipDefaults.filterChipColors(
                                             selectedContainerColor = MadeiraClara,
@@ -307,7 +309,7 @@ fun AlarmesScreen(
                             }
                         }
                     }
-                    if (erro.isNotBlank()) Text(erro, color = Color(0xFFE18A75), fontSize = 12.sp)
+                    if (erro.isNotBlank() || state.erro != null) Text(if (erro.isNotBlank()) erro else state.erro.orEmpty(), color = Color(0xFFE18A75), fontSize = 12.sp)
                 }
             },
             confirmButton = {
@@ -319,14 +321,8 @@ fun AlarmesScreen(
                         erro = "Digite um nome para o alarme."
                     } else {
                         val novoAlarme = Alarme(horario = novoHorario.text, nome = novoNome.trim(), dias = textoRepeticao(novosDias), ativo = true)
-                        scope.launch {
-                            val salvo = withContext(Dispatchers.IO) {
-                                val id = alarmeDao.inserir(novoAlarme)
-                                alarmeDao.buscarPorId(id.toInt())
-                            }
-                            salvo?.let { alarmes.add(it) }
-                            mostrarNovoAlarme = false
-                        }
+                        viewModel.adicionarAlarme(novoAlarme)
+                        mostrarNovoAlarme = false
                     }
                 }) { Text("Salvar", color = MadeiraClara) }
             },
@@ -349,11 +345,8 @@ fun AlarmesScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    scope.launch {
-                        withContext(Dispatchers.IO) { alarmeDao.excluir(alarme) }
-                        alarmes.removeAll { it.id == alarme.id }
-                        alarmeParaExcluir = null
-                    }
+                    viewModel.removerAlarme(alarme)
+                    alarmeParaExcluir = null
                 }) { Text("Excluir", color = Color(0xFFE18A75)) }
             },
             dismissButton = {

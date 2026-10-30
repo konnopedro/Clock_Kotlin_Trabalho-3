@@ -1,4 +1,7 @@
-package com.example.tungclock
+package com.example.tungclock.ui
+
+import com.example.tungclock.data.Alarme
+import com.example.tungclock.data.FusoHorario
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,12 +16,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,23 +60,12 @@ private val TextoSecundario = Color(0xFFBCA18A)
 @Composable
 fun DetalheFusoScreen(
     id: Int,
-    fusos: SnapshotStateList<FusoHorario>,
+    fusos: List<FusoHorario>,
+    viewModel: com.example.tungclock.viewmodel.FusoViewModel,
     onVoltar: () -> Unit
 ) {
 
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val fusoDao = remember { database.fusoHorarioDao() }
-
-    var fuso by remember(id) {
-        mutableStateOf<FusoHorario?>(null)
-    }
-
-    LaunchedEffect(id) {
-        fuso = withContext(Dispatchers.IO) {
-            fusoDao.buscarPorId(id)
-        }
-    }
+    val fuso = fusos.firstOrNull { it.id == id }
 
     if (fuso == null) {
         Column(
@@ -92,6 +86,12 @@ fun DetalheFusoScreen(
     }
 
     val fusoAtual = fuso ?: return
+
+    val state by viewModel.uiState.collectAsState()
+    val editando = state.fusoEmEdicao == fusoAtual.id
+    val cidadeEditada = state.cidadeEdicao
+    val paisEditado = state.paisEdicao
+    var erroEdicao by remember(fusoAtual.id) { mutableStateOf("") }
 
     var agora by remember {
         mutableStateOf(
@@ -188,6 +188,41 @@ fun DetalheFusoScreen(
                 color = TextoSecundario,
                 fontSize = 13.sp
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (editando) {
+                OutlinedTextField(
+                    value = cidadeEditada,
+                    onValueChange = { viewModel.alterarCidade(it) },
+                    label = { Text("Nome da cidade") },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = paisEditado,
+                    onValueChange = { viewModel.alterarPais(it) },
+                    label = { Text("País") },
+                    singleLine = true
+                )
+                if (erroEdicao.isNotBlank() || state.erro != null) Text(if (erroEdicao.isNotBlank()) erroEdicao else state.erro.orEmpty(), color = Color(0xFFE18A75))
+                Button(onClick = {
+                    if (cidadeEditada.isBlank() || paisEditado.isBlank()) {
+                        erroEdicao = "Preencha cidade e país."
+                    } else {
+                        viewModel.atualizarFuso(
+                            fusoAtual.copy(cidade = cidadeEditada.trim(), pais = paisEditado.trim())
+                        )
+                        viewModel.cancelarEdicao()
+                        erroEdicao = ""
+                    }
+                }) { Text("Salvar alterações") }
+                Button(onClick = {
+                    viewModel.cancelarEdicao()
+                    erroEdicao = ""
+                }) { Text("Cancelar") }
+            } else {
+                Button(onClick = { viewModel.iniciarEdicao(fusoAtual) }) { Text("Editar informações") }
+            }
 
             Spacer(
                 modifier = Modifier.height(35.dp)
