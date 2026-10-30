@@ -42,9 +42,9 @@ class FusoViewModel(private val repository: FusoHorarioRepository) : ViewModel()
         _uiState.update { it.copy(fusoEmEdicao = null, cidadeEdicao = "", paisEdicao = "") }
     }
 
-    fun adicionarFuso(fuso: FusoHorario) = executar { repository.inserir(fuso) }
+    fun adicionarFuso(fuso: FusoHorario, aoSalvar: () -> Unit = {}) = executar(aoSalvar) { repository.inserir(fuso) }
     fun atualizarFuso(fuso: FusoHorario, aoSalvar: () -> Unit = {}) = executar(aoSalvar) { repository.atualizar(fuso) }
-    fun removerFuso(fuso: FusoHorario) = executar { repository.excluir(fuso) }
+    fun removerFuso(fuso: FusoHorario, aoExcluir: () -> Unit = {}) = executar(aoExcluir) { repository.excluir(fuso) }
 
     private fun executar(aoConcluir: () -> Unit = {}, operacao: suspend () -> Unit) {
         viewModelScope.launch {
