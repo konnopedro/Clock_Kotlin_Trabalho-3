@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -138,10 +139,16 @@ fun DetalheAlarmeScreen(
     }
 
     val alarmeAtual = alarme!!
-    var horario by remember(id) { mutableStateOf(TextFieldValue(alarmeAtual.horario)) }
-    var nome by remember(id) { mutableStateOf(alarmeAtual.nome) }
-    var diasSelecionados by remember(id) { mutableStateOf(diasSelecionadosDoTexto(alarmeAtual.dias)) }
-    var ativo by remember(id) { mutableStateOf(alarmeAtual.ativo) }
+    val state by viewModel.uiState.collectAsState()
+    LaunchedEffect(id) {
+        if (state.alarmeEmEdicao != id) {
+            viewModel.iniciarEdicao(alarmeAtual, diasSelecionadosDoTexto(alarmeAtual.dias))
+        }
+    }
+    val horario = TextFieldValue(state.horarioEdicao)
+    val nome = state.nomeEdicao
+    val diasSelecionados = state.diasEdicao
+    val ativo = state.ativoEdicao
     var erro by remember(id) { mutableStateOf("") }
 
     Scaffold(
@@ -173,7 +180,7 @@ fun DetalheAlarmeScreen(
             OutlinedTextField(
                 value = horario,
                 onValueChange = { entrada ->
-                    horario = formatarEntradaHorario(entrada)
+                    viewModel.alterarHorarioEdicao(formatarEntradaHorario(entrada).text)
                     erro = ""
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -196,7 +203,7 @@ fun DetalheAlarmeScreen(
 
             OutlinedTextField(
                 value = nome,
-                onValueChange = { nome = it; erro = "" },
+                onValueChange = { viewModel.alterarNomeEdicao(it); erro = "" },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Nome do alarme") },
                 singleLine = true,
@@ -234,7 +241,7 @@ fun DetalheAlarmeScreen(
                             FilterChip(
                                 selected = selecionado,
                                 onClick = {
-                                    diasSelecionados = if (selecionado) diasSelecionados - dia else diasSelecionados + dia
+                                    viewModel.alterarDiaEdicao(dia)
                                     erro = ""
                                 },
                                 label = { Text(dia.take(3), fontSize = 12.sp) },
@@ -264,7 +271,7 @@ fun DetalheAlarmeScreen(
                         fontSize = 12.sp
                     )
                 }
-                Switch(checked = ativo, onCheckedChange = { ativo = it })
+                Switch(checked = ativo, onCheckedChange = { viewModel.alterarAtivoEdicao(it) })
             }
 
             if (erro.isNotBlank()) {
