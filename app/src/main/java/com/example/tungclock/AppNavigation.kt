@@ -56,30 +56,16 @@ fun AppNavigation() {
     val rotaAtual = navBackStackEntry?.destination?.route
     val context = LocalContext.current
     val database = remember { AppDatabase.getDatabase(context) }
-    val alarmes = remember { mutableStateListOf<Alarme>() }
-    val fusos = remember { mutableStateListOf<FusoHorario>() }
-
-    LaunchedEffect(Unit) {
-        val (alarmesSalvos, fusosSalvos) = withContext(Dispatchers.IO) {
-            val alarmeDao = database.alarmeDao()
-            val fusoDao = database.fusoHorarioDao()
-
-            if (alarmeDao.buscarTodos().first().isEmpty()) {
-                alarmeDao.inserir(Alarme(horario = "07:00", nome = "Acordar", dias = "Segunda a sexta", ativo = true))
-                alarmeDao.inserir(Alarme(horario = "12:00", nome = "Almoço", dias = "Todos os dias", ativo = false))
-            }
-            if (fusoDao.buscarTodos().first().isEmpty()) {
-                fusoDao.inserir(FusoHorario(cidade = "São Paulo", pais = "Brasil", zona = "America/Sao_Paulo", offset = -3))
-                fusoDao.inserir(FusoHorario(cidade = "New York", pais = "Estados Unidos", zona = "America/New_York", offset = -4))
-                fusoDao.inserir(FusoHorario(cidade = "Londres", pais = "Reino Unido", zona = "Europe/London", offset = 1))
-            }
-            Pair(alarmeDao.buscarTodos().first(), fusoDao.buscarTodos().first())
-        }
-        alarmes.clear()
-        alarmes.addAll(alarmesSalvos)
-        fusos.clear()
-        fusos.addAll(fusosSalvos)
-    }
+    val alarmeRepository = remember(database) { com.example.tungclock.data.repository.AlarmeRepository(database.alarmeDao()) }
+    val fusoRepository = remember(database) { com.example.tungclock.data.repository.FusoHorarioRepository(database.fusoHorarioDao()) }
+    val alarmeViewModel: com.example.tungclock.viewmodel.AlarmeViewModel =
+        androidx.lifecycle.viewmodel.compose.viewModel(factory = com.example.tungclock.viewmodel.AlarmeViewModelFactory(alarmeRepository))
+    val fusoViewModel: com.example.tungclock.viewmodel.FusoViewModel =
+        androidx.lifecycle.viewmodel.compose.viewModel(factory = com.example.tungclock.viewmodel.FusoViewModelFactory(fusoRepository))
+    val alarmeState by alarmeViewModel.uiState.collectAsState()
+    val fusoState by fusoViewModel.uiState.collectAsState()
+    val alarmes = alarmeState.alarmes
+    val fusos = fusoState.fusos
 
     val mostrarBarra = rotaAtual == Rotas.RELOGIO || rotaAtual == Rotas.ALARMES || rotaAtual == Rotas.CRONOMETRO || rotaAtual == Rotas.TIMER
 
@@ -143,6 +129,7 @@ fun AppNavigation() {
                 AlarmesScreen(
                     paddingValues = paddingValues,
                     alarmes = alarmes,
+                    viewModel = alarmeViewModel,
                     onVoltar = { navController.navigate(Rotas.RELOGIO) { launchSingleTop = true } },
                     onAbrirDetalhes = { id -> navController.navigate("detalhe_alarme/$id") }
                 )
@@ -153,6 +140,7 @@ fun AppNavigation() {
                 FusosScreen(
                     paddingValues = paddingValues,
                     fusos = fusos,
+                    viewModel = fusoViewModel,
                     onVoltar = { navController.popBackStack() },
                     onAbrirDetalhes = { id -> navController.navigate("detalhe_fuso/$id") }
                 )
@@ -174,6 +162,7 @@ fun AppNavigation() {
                 DetalheFusoScreen(
                     id = entry.arguments?.getInt("id") ?: -1,
                     fusos = fusos,
+                    viewModel = fusoViewModel,
                     onVoltar = { navController.popBackStack() }
                 )
             }
