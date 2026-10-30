@@ -22,31 +22,41 @@ Aplicativo Android de relógio desenvolvido em **Kotlin** com **Jetpack Compose*
 - Gradle
 - JDK 17
 
-## Organização do projeto
+## Organização do projeto (Trabalho 4 — MVVM)
 
-Os principais arquivos da aplicação ficam em `app/src/main/java/com/example/tungclock/`:
+O aplicativo continua com as sete telas anteriores. A refatoração separa o acesso ao banco da interface, sem adicionar serviços externos.
 
-| Arquivo | Responsabilidade |
+| Pacote | Responsabilidade |
 | --- | --- |
-| `MainActivity.kt` | Ponto de entrada da aplicação. |
-| `AppNavigation.kt` | Organiza a navegação entre as telas e carrega os dados persistidos. |
-| `RelogioScreen.kt` | Tela do relógio. |
-| `CronometroScreen.kt` | Tela do cronômetro. |
-| `TimerScreen.kt` | Tela do timer. |
-| `AlarmesScreen.kt` | Lista, cadastro e exclusão de alarmes. |
-| `DetalheAlarmeScreen.kt` | Consulta e edição de um alarme selecionado. |
-| `FusosScreen.kt` | Lista, cadastro e exclusão de fusos horários. |
-| `DetalheFusoScreen.kt` | Exibe o horário atual do fuso e a comparação com São Paulo. |
-| `Model.kt` | Define as entidades `Alarme` e `FusoHorario` do Room. |
-| `AlarmeDao.kt` | Operações de consulta e alteração dos alarmes no banco. |
-| `FusoHorarioDao.kt` | Operações de consulta e alteração dos fusos no banco. |
-| `AppDataBase.kt` | Configuração e instância singleton do banco de dados. |
+| `data` | `Alarme`, `FusoHorario`, DAOs e `AppDatabase`, mantendo as tabelas Room existentes. |
+| `data.repository` | `AlarmeRepository` e `FusoHorarioRepository`: únicas classes de domínio que acessam os DAOs. |
+| `viewmodel` | `AlarmeViewModel`, `FusoViewModel`, os respectivos `UiState` e as `ViewModelFactory`. |
+| `ui` | Telas Compose, sem operações diretas no banco. |
+| raiz | `MainActivity` e `AppNavigation`, onde a navegação e a criação dos ViewModels são ligadas às telas. |
+
+### Decisões de arquitetura
+
+**Antes (Trabalho 3):** os Composables consultavam o DAO diretamente, acionavam corrotinas para gravar registros e atualizavam as listas manualmente.
+
+**Depois (Trabalho 4):** a tela chama ações do ViewModel; ele acessa o Repository, que chama o DAO. A consulta `buscarTodos()` dos dois DAOs retorna `Flow<List<...>>`; o ViewModel coleta esse fluxo e expõe `MutableStateFlow` privado com `StateFlow` público. As telas observam o estado e se redesenham quando a lista muda.
+
+Os `AlarmeUiState` e `FusoUiState` agrupam a lista, o indicador de carregamento e a mensagem de erro. As `ViewModelFactory` recebem os Repositories e os fornecem aos ViewModels, sem usar Hilt. O Room continua local, com as mesmas entidades e nome do banco.
+
+### Evidências e apresentação (a completar pelo trio)
+
+Incluam capturas ou links de vídeos feitos **no aplicativo em execução**, demonstrando:
+- criação, edição, ativação/desativação e exclusão de um alarme;
+- inclusão e exclusão de cidades e navegação para os detalhes;
+- fechamento completo e reabertura do aplicativo, confirmando os dados persistidos;
+- exibição da estrutura `ui / data / data.repository / viewmodel` no Android Studio.
+
+**Dificuldades e participação do trio:** registrar aqui, com as próprias palavras, os problemas reais encontrados e como cada integrante ajudou a resolvê-los. Não preencher com ocorrências inventadas.
 
 ## Persistência com Room
 
 O banco local utilizado pela aplicação é `tungclock_database`. Ele contém as entidades `Alarme` e `FusoHorario`, com identificadores gerados automaticamente.
 
-Os DAOs disponibilizam operações para inserir, listar, buscar por ID, atualizar e excluir registros. Ao iniciar o aplicativo, os dados são carregados do banco. Exemplos iniciais são inseridos apenas quando a tabela correspondente está vazia. As operações de acesso ao banco são executadas em `Dispatchers.IO`.
+Os DAOs disponibilizam operações para inserir, listar, buscar por ID, atualizar e excluir registros. As consultas de listas usam `Flow`, e as gravações são realizadas pelos ViewModels com `viewModelScope`. O banco permanece no dispositivo.
 
 ## Como executar
 
