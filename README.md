@@ -87,4 +87,5 @@ Projeto desenvolvido em Kotlin com Jetpack Compose.
 
 ---
 4. DOCUMENTAÇÃO:
-<a href="<a href="https://sua-url.com" target="_blank">Documentação Tun Tun Clock</a>" target="_blank"></a>
+<a href="https://drive.google.com/file/d/1rGkMoaBIgb1VVbDxHlFkYoLno1geuAvn/view?usp=drivesdk" target="_blank">Documentação Tun Tun Clock</a>
+
